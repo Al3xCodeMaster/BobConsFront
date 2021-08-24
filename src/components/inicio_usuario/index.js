@@ -177,7 +177,7 @@ export default function Dashboard_empleado() {
               <MenuIcon />
             </IconButton>
             <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>
-              Al sazón de la Paloma Admin Panel
+              BobCons Panel
           </Typography>
           </Toolbar>
         </AppBar>

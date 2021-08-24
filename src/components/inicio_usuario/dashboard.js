@@ -130,8 +130,7 @@ export default function Dashboard() {
           fetch((process.env.REACT_APP_BACKEND || "http://localhost:4000/") + "updateUserPassword", {
             method: 'POST',
             body: JSON.stringify({
-              RestaurantUserID: usuario.status==200?usuario.userInfo.Payload.Id:"",
-              DocumentTypeID: usuario.status==200?usuario.userInfo.Payload.DocType:"",
+              RestaurantUserID: usuario.status==200?usuario.userInfo.id:"",
               OldPassword: contrasenhaOld,
               NewPassword: contrasenhaNew
             })      
@@ -157,11 +156,9 @@ export default function Dashboard() {
 
     const setOpenPopAction = (event) => {
         event.preventDefault();
-        dispatch(set_nombre(usuario.status==200?usuario.userInfo.Payload.UserName:""));
-        dispatch(set_apellido(usuario.status==200?usuario.userInfo.Payload.LastName:""));
-        dispatch(set_date(usuario.status==200?new Date(usuario.userInfo.Payload.Birthdate):datePick));
-        dispatch(set_id(usuario.status==200?usuario.userInfo.Payload.Id:""));
-        dispatch(set_type_id(usuario.status==200?usuario.userInfo.Payload.DocType:""));
+        dispatch(set_nombre(usuario.status==200?usuario.userInfo.username:""));
+        dispatch(set_apellido(usuario.status==200?usuario.userInfo["last name"]:""));
+        dispatch(set_id(usuario.status==200?usuario.userInfo.id:""));
         setopenPop(true);
     }
 
@@ -179,8 +176,7 @@ export default function Dashboard() {
           var formData = new FormData();
           formData.append('photo', file);
           formData.append('userInfo', JSON.stringify({
-            RestaurantUserID: parseInt(usuario.userInfo.Payload.Id),
-            DocumentTypeID: usuario.userInfo.Payload.DocType
+            RestaurantUserID: parseInt(usuario.userInfo.id)
           }));
           fetch((process.env.REACT_APP_BACKEND || "http://localhost:4000/") + "updatePhoto", {
             method: 'POST',
@@ -194,7 +190,7 @@ export default function Dashboard() {
               else {
                 set_message_success(response.Message);
                 set_open_sucess(true);
-                dispatch(success_login({Payload: {...usuario.userInfo.Payload, UrlPhoto: response.UrlPhoto}, Message: "Ingreso Realizado!"},200))
+                dispatch(success_login({Payload: {...usuario.userInfo, UrlPhoto: response.UrlPhoto}, Message: "Ingreso Realizado!"},200))
               }
             })
             .catch(error => {
@@ -206,7 +202,7 @@ export default function Dashboard() {
 
     useEffect(() => {
       if(usuario.status==200){
-        fetch((process.env.REACT_APP_BACKEND || "http://localhost:4000/")+"getAllUserProfiles/"+usuario.userInfo.Payload.DocType+"/"+usuario.userInfo.Payload.Id, {
+        fetch((process.env.REACT_APP_BACKEND || "http://localhost:4000/")+"getAllUserProfiles/"+usuario+"/"+usuario.userInfo.id, {
           method: 'GET'
       }).then(res => res.status==204?[]:res.json())
           .then(response => {
@@ -228,18 +224,15 @@ export default function Dashboard() {
             <Grid container spacing={3}>
                 <Grid item xs={6}>
                 <Paper className={fixedHeightPaper}>
-                <Title>{usuario.status==200?usuario.userInfo.Payload.UserName+" "+usuario.userInfo.Payload.LastName:"No user"}</Title>    
+                <Title>{usuario.status==200?usuario.userInfo.username+" "+usuario.userInfo["last name"]:"No user"}</Title>    
                 <Typography color="textPrimary" className={classes.depositContext}>
-                {usuario.status==200?"Numero de Documento: "+usuario.userInfo.Payload.Id:""}
+                {usuario.status==200?"Numero de Documento: "+usuario.userInfo.id:""}
                 </Typography>
                 <Typography color="textPrimary" className={classes.depositContext}>
-                {usuario.status==200?"Tipo de Documento: "+usuario.userInfo.Payload.DocType:""}
+                
                 </Typography>
                 <div>
-                  <Typography color='textPrimary'>{usuario.status==200?"Fecha de nacimiento: "+(new Date(usuario.userInfo.Payload.Birthdate).toLocaleDateString()):""}
-                  </Typography>
-                  <Typography color='textPrimary'>{usuario.status==200?"Fecha de creación: "+(new Date(usuario.userInfo.Payload.CreationD).toLocaleDateString()):""}
-                  </Typography>
+                  
                 </div>
                   <Link color="primary" href="" onClick={(e) => handleClickOpen(e)}> Cambiar mi contraseña </Link>
                   <Link color="primary" href="" onClick={(e) => setOpenPopAction(e)}> Actualizar mis datos </Link>
@@ -255,7 +248,6 @@ export default function Dashboard() {
                                                                                                                                                                                 style={{ display: "none" }}
                                                                                                                                                                                 /></IconButton></Tooltip>}
                                                                                                                                                                                 >
-                        <Avatar src={usuario.status==200?(process.env.REACT_APP_BACKEND || "http://localhost:4000/") + "file/"+usuario.userInfo.Payload.UrlPhoto:null } className={classes.avatar}/> 
                   </Badge>
                   
                 </Grid>

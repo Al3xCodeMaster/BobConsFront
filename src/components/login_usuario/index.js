@@ -42,7 +42,7 @@ const theme = createMuiTheme({
 function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
-      {'Copyright © Al sazón de la Paloma '}
+      {'Copyright © BobCons '}
       {new Date().getFullYear()}
       {'.'}
     </Typography>
@@ -87,50 +87,8 @@ const Login_usuario = () => {
   const [pass_invalid, set_pass_invalid] = useState(false);
   const [helper_cedula, set_helper_cc] = useState('');
   const [helper_contrasenha, set_helper_pass] = useState('');
-  const [open, setOpen] = React.useState(false);
-  const [openAut, setOpenAut] = React.useState(false);
   const [error_contrasenha, set_error_contrasenha] = useState(false);
-  const [options, setOptions] = useState([]);
-  const loading = openAut && options.length === 0;
-  const [type_id, set_type_id] = useState('');
-  const vertical = 'center';
-  const horizontal = 'right';
   const classes = useStyles();
-
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  React.useEffect(() => {
-		let active = true;
-
-		if (!loading) {
-			return undefined;
-		}
-
-		fetch((process.env.REACT_APP_BACKEND || "http://localhost:4000/")+"getAllDocuments", {
-				method: 'GET'
-			}).then(res => res.json())
-			.then(items => {
-				if(active){
-					setOptions(items.map((x) => x.DocumentTypeID));
-				}
-			})
-			.catch(err => console.log(err));
-		return () => {
-			active = false;
-		};
-	}, [loading]);
-
-	React.useEffect(() => {
-		if (!open) {
-		  setOptions([]);
-		}
-	  }, [open]);
 
   const ingresar = () => {
 
@@ -139,14 +97,18 @@ const Login_usuario = () => {
       set_helper_pass('');
       set_helper_cc('');
       let status;
-      fetch((process.env.REACT_APP_BACKEND || "http://localhost:4000/")+"userLogin", {
+      fetch("https://bobcons.herokuapp.com/api/login/", {
         method: 'POST',
-        body: JSON.stringify({ RestaurantUserID: parseInt(cedula), DocumentTypeID: type_id, RestaurantUserPass: contrasenha }) // data can be `string` or {object}!
+        headers: new Headers({
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }),
+        body: JSON.stringify({app_user_id: cedula, password: contrasenha}) // data can be `string` or {object}!
       }).then(res => { status = res.status; return res.json()})
         .then(response => {
-          if(response.error){
+          if(status!=200){
             set_pass_invalid(true);
-            dispatch(error_login(response.error));
+            dispatch(error_login(response.detail));
           }else{
             dispatch(success_login(response, status));
           }
@@ -181,40 +143,6 @@ const Login_usuario = () => {
               onChange={e => set_cedula(e.target.value)}
               autoFocus
             />
-            <Autocomplete
-                            id="async-autocompl"
-                            open={openAut}
-                            onOpen={() => {
-                              setOpenAut(true);
-                            }}
-                            onClose={() => {
-                              setOpenAut(false);
-                            }}
-                            getOptionSelected={(option, value) => option === value}
-                            getOptionLabel={(option) => option}
-                            options={options}
-                            loading={loading}
-                            onChange={(event, newValue) => {
-                              set_type_id(newValue);
-                            }}
-                            renderInput={(params) => (
-                                <TextField 
-                                    {...params}
-                                    className={classes.input}
-                                    label="Seleccione el documento"
-                                    variant="outlined"
-                                    InputProps={{
-                                        ...params.InputProps,
-                                        endAdornment: (
-                                            <React.Fragment>
-                                                {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                                                {params.InputProps.endAdornment}
-                                            </React.Fragment>
-                                        ),
-                                    }}
-                                />
-                            )}
-                    />
             <TextField
               variant="outlined"
               margin="normal"
@@ -247,13 +175,6 @@ const Login_usuario = () => {
                 {"Error en la contraseña o usuario: "}
               </Alert>
             </Snackbar>
-            <Grid container>
-              <Grid item xs>
-                <Link href="#" variant="body2" style={{ color: '#707070' }}>
-                  Recuperar contraseña
-                </Link>
-              </Grid>
-            </Grid>
             <Box mt={5}>
               <Copyright />
             </Box>

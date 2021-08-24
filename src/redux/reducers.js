@@ -27,8 +27,6 @@ import {
 const initialState = {
     usuario: {},
     client: {},
-    restaurantID:0,
-    products: [],
     message: 'Hola redux',
     cargando: false,
     coordenadas: { lat: 3.382225, lng: -76.531584 },
