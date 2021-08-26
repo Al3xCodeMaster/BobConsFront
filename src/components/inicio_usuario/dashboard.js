@@ -10,11 +10,9 @@ import Typography from '@material-ui/core/Typography';
 import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
 import IconButton from '@material-ui/core/IconButton';
-import Badge from '@material-ui/core/Badge';
 import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';    
-import Avatar from '@material-ui/core/Avatar';
 import Title from './Title';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -22,10 +20,9 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Link from '@material-ui/core/Link'
-import { TextField, Input, Tooltip, List, ListItem, ListItemText} from '@material-ui/core';
+import { TextField, Input, List, ListItem, ListItemText} from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import UpdateUserAdmin from './formulario_update';
-import CameraAltIcon from '@material-ui/icons/CameraAlt';
 import { useSelector, useDispatch } from 'react-redux';
 import {
 	set_id,
@@ -93,8 +90,7 @@ export default function Dashboard() {
   const [contrasenhaOld, set_contrasenhaOld] = useState('');
   const [showPassword, set_showPassword] = useState(false);
   const [openPop, setopenPop] = useState(false);
-  const [profiles, setProfiles] = useState([]);
-
+  
   const handleClickOpen = (event) => {
     event.preventDefault();
     setOpen(true);
@@ -170,51 +166,6 @@ export default function Dashboard() {
       dispatch(set_type_id(""));
       setopenPop(false);
     };
-
-    const changeProfilePic = (file) => {
-      if(window.confirm("¿Desea subir la foto? con nombre de archivo:\n\n\t"+file.name)){
-          var formData = new FormData();
-          formData.append('photo', file);
-          formData.append('userInfo', JSON.stringify({
-            RestaurantUserID: parseInt(usuario.userInfo.id)
-          }));
-          fetch((process.env.REACT_APP_BACKEND || "http://localhost:4000/") + "updatePhoto", {
-            method: 'POST',
-            body: formData
-          }).then(res => res.json())
-            .then(response => {
-              if (response.status === 400) {
-                set_message(response.error);
-                setOpen(true);
-              }
-              else {
-                set_message_success(response.Message);
-                set_open_sucess(true);
-                dispatch(success_login({Payload: {...usuario.userInfo, UrlPhoto: response.UrlPhoto}, Message: "Ingreso Realizado!"},200))
-              }
-            })
-            .catch(error => {
-              set_message(error);
-              setOpen(true);
-            });
-      }
-    }
-
-    useEffect(() => {
-      if(usuario.status==200){
-        fetch((process.env.REACT_APP_BACKEND || "http://localhost:4000/")+"getAllUserProfiles/"+usuario+"/"+usuario.userInfo.id, {
-          method: 'GET'
-      }).then(res => res.status==204?[]:res.json())
-          .then(response => {
-              if(response.length > 0){
-                setProfiles(response);
-              }
-          })
-          .catch(error => {
-              alert(error);
-          })  
-      }
-    }, []);
     
     const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
     return (
@@ -229,7 +180,7 @@ export default function Dashboard() {
                 {usuario.status==200?"Numero de Documento: "+usuario.userInfo.id:""}
                 </Typography>
                 <Typography color="textPrimary" className={classes.depositContext}>
-                
+                {usuario.status==200?"Email: "+usuario.userInfo.email:""}
                 </Typography>
                 <div>
                   
@@ -238,32 +189,17 @@ export default function Dashboard() {
                   <Link color="primary" href="" onClick={(e) => setOpenPopAction(e)}> Actualizar mis datos </Link>
                 </Paper>
                 </Grid>
-                {/* Recent Deposits */}
-                <Grid item xs={6}>
-                  <Badge
-                        overlap="circle"
-                        badgeContent={<Tooltip placement="right-start" title="Subir/Cambiar foto"><IconButton aria-label="Cambiar foto" component="label"><CameraAltIcon/><Input
-                                                                                                                                                                                type="file"
-                                                                                                                                                                                onChange={e => changeProfilePic(e.target.files[0])}
-                                                                                                                                                                                style={{ display: "none" }}
-                                                                                                                                                                                /></IconButton></Tooltip>}
-                                                                                                                                                                                >
-                  </Badge>
-                  
-                </Grid>
-                {/* Recent Orders */}
                 <Grid item xs={9}>
-                <h2>Perfiles:</h2>
+                <h2>Roles:</h2>
                 <Paper className={classes.paper}>
                   <List dense>
-                  {usuario.status==200?profiles.length>0?profiles.map( (element, index) => (
+                  {usuario.status==200?usuario.userInfo.Role.length>0?usuario.userInfo.Role.map( (element, index) => (
                     <ListItem key={index}>
                     <ListItemText
-                      primary={element.ProfileName}
-                      secondary={element.ProfileCreationDate? new Date(element.ProfileCreationDate).toLocaleDateString():null}
+                      primary={element}
                     />
                   </ListItem>
-                  )):<ListItem><h3>No tiene asignados perfiles</h3></ListItem>:null}
+                  )):<ListItem><h3>{usuario.userInfo["Is staff"]?"Admin con todos los privilegios":"No tiene roles asignados"}</h3></ListItem>:null}
                   </List>
                 </Paper>
                 </Grid>

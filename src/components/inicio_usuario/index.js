@@ -177,7 +177,7 @@ export default function Dashboard_empleado() {
               <MenuIcon />
             </IconButton>
             <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>
-              BobCons Panel
+              {usuario.userInfo?usuario.userInfo["Is staff"]?"BobCons ADMIN panel":"BobCons Panel":null}
           </Typography>
           </Toolbar>
         </AppBar>
@@ -203,12 +203,6 @@ export default function Dashboard_empleado() {
           <div className={classes.appBarSpacer} />
           <Container maxWidth="lg" className={classes.container}>
           <Switch>
-              <Route path="/admin/usuarios" component={Usuarios} />
-              <Route path="/admin/perfiles" component={Profiles} />
-              <Route path="/admin/productos" component={Products} />
-              <Route path="/admin/restaurantes" component={Restaurants} />
-              <Route path="/admin/bancos" component={Banks} />
-              <Route path="/usuario/reportes" component={Reports} />
               <Route path="/" component={DashboardUser} />
             </Switch>
           </Container>
