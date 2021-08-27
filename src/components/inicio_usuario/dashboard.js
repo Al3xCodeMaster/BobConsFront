@@ -177,7 +177,7 @@ export default function Dashboard() {
                 <Paper className={fixedHeightPaper}>
                 <Title>{usuario.status==200?usuario.userInfo.username+" "+usuario.userInfo["last name"]:"No user"}</Title>    
                 <Typography color="textPrimary" className={classes.depositContext}>
-                {usuario.status==200?"Numero de Documento: "+usuario.userInfo.id:""}
+                {usuario.status==200?"Numero de Documento: "+usuario.userInfo.app_user_id:""}
                 </Typography>
                 <Typography color="textPrimary" className={classes.depositContext}>
                 {usuario.status==200?"Email: "+usuario.userInfo.email:""}
