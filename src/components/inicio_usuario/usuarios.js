@@ -210,7 +210,7 @@ export default function Usuarios(){
                     <FormularioUsuario/>
                 </TabPanel>
                 <TabPanel value={value} index={1}>
-                    <EnhancedTable/>
+                    
                 </TabPanel>
             </Fragment>
     );
@@ -405,7 +405,7 @@ function TabPanel(props) {
     );
   };
   
-    
+  /*  
   function EnhancedTable() {
 
     const classes = useStyles();
@@ -712,4 +712,4 @@ function TabPanel(props) {
          </Snackbar>
       </div>
     );
-  }
+  }*/

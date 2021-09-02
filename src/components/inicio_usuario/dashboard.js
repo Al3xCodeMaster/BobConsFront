@@ -81,9 +81,10 @@ export default function Dashboard() {
     const [open_success, set_open_sucess] = React.useState(false);
     const [message, set_message] = React.useState('');
     const [message_success, set_message_success] = React.useState('');
-    const { usuario, datePick} = useSelector(state => ({
+    const { usuario, datePick, access} = useSelector(state => ({
     usuario: state.redux_reducer.usuario,
-    datePick: state.redux_reducer.datePick
+    datePick: state.redux_reducer.datePick,
+    access: state.redux_reducer.usuario.userInfo.access
   }));
   const [open, setOpen] = React.useState(false);
   const [contrasenhaNew, set_contrasenhaNew] = useState('');
@@ -122,19 +123,26 @@ export default function Dashboard() {
     };
 
     const perfomChange = (event) => {
+      let status = 0
         if(window.confirm("¿Desea cambiar la contraseña?")){
-          fetch((process.env.REACT_APP_BACKEND || "http://localhost:4000/") + "updateUserPassword", {
-            method: 'POST',
+          fetch("https://bobcons.herokuapp.com/api/change-password/", {
+            method: 'PUT',
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer " + access,
+            },
             body: JSON.stringify({
-              RestaurantUserID: usuario.status==200?usuario.userInfo.id:"",
-              OldPassword: contrasenhaOld,
-              NewPassword: contrasenhaNew
+              old_password: contrasenhaOld,
+              new_password: contrasenhaNew
             })      
-        }).then(res => res.json())
+        }).then(res => {
+          status = res.status;
+          return res.json();
+        })
             .then(response => {
-                    if(response.error){
+                    if(status != 200){
                       setopenMess(true);
-                      set_message('Error: '+response.error);
+                      set_message('Error: '+"Contraseña antigua invalida");
                         return
                     }
                     set_open_sucess(true);

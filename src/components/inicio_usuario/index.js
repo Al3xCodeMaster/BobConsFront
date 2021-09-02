@@ -203,6 +203,7 @@ export default function Dashboard_empleado() {
           <div className={classes.appBarSpacer} />
           <Container maxWidth="lg" className={classes.container}>
           <Switch>
+              <Route path="/admin/usuarios" component={Usuarios} />
               <Route path="/" component={DashboardUser} />
             </Switch>
           </Container>

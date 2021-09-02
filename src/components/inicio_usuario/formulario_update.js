@@ -100,7 +100,7 @@ export default function Formulario_update_usuario() {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer " + access,
+          "Authorization": "Bearer " + access,
         },
         body: JSON.stringify({
           user_name: name,
@@ -114,7 +114,7 @@ export default function Formulario_update_usuario() {
         })
         .then((response) => {
           if (status != 200) {
-            set_message("No se realizo la operación: " + response.error);
+            set_message("No se realizo la operación: " + response.details);
             setOpen(true);
           } else {
             set_message_success("Hecho");

@@ -72,17 +72,19 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function getSteps() {
-	return ['Información básica', 'Dirección', 'Seguridad'];
+	return ['Información básica', 'Seguridad'];
 }
 function Informacion_basica() {
 	const classes = useStyles();
 	const [id, set_cc] = useState('');
 	const [nombre, set_name] = useState('');
 	const [apellido, set_last_name] = useState('');
+	const [email, set_email] = useState('');
 	const [options, setOptions] = useState([]);
 	const [open, setOpen] = useState(false);
 	const loading = open && options.length === 0;
-	const {datePick} = useSelector(state => ({
+	const {access, datePick} = useSelector(state => ({
+		access: state.redux_reducer.usuario.userInfo.access,
 		datePick: state.redux_reducer.datePick,
 	}));
 	const dispatch = useDispatch();
@@ -100,8 +102,9 @@ function Informacion_basica() {
 		set_last_name(value);
 	}
 	
-	const handleDateChange = (value) => {
-		dispatch(set_date(value));
+	const set_state_email = (value) => {
+		dispatch(set_correo(value));
+		set_email(value);
 	};
 
 	const set_state_type_id = (value) => {
@@ -115,12 +118,16 @@ function Informacion_basica() {
 			return undefined;
 		}
 
-		fetch((process.env.REACT_APP_BACKEND || "http://localhost:4000/")+"getAllDocuments", {
-				method: 'GET'
+		fetch("https://bobcons.herokuapp.com/api/documentTypeGET/", {
+				method: 'GET',
+				headers: {
+					"Content-Type": "application/json",
+					"Authorization": "Bearer " + access,
+				  },
 			}).then(res => res.json())
 			.then(items => {
 				if(active){
-					setOptions(items.map((x) => x.DocumentTypeID));
+					setOptions(items.map((x) => x.document_type_id));
 				}
 			})
 			.catch(err => console.log(err));
@@ -174,21 +181,14 @@ function Informacion_basica() {
 			/>
 			<TextField id="usuario_nombre" value={nombre} onChange={e => set_state_nombre(e.target.value)} className={classes.input} label="Nombre" variant="outlined" />
 			<TextField id="usuario_apellido" value={apellido} onChange={e => set_state_apellido(e.target.value)} className={classes.input} label="Apellido" variant="outlined" />
-			<MuiPickersUtilsProvider utils={DateFnsUtils}>
-				<KeyboardDatePicker
-					disableFuture
-					fullWidth
-					margin="normal"
-					id="date-picker-birthday-user"
-					label="Fecha de nacimiento"
-					format="yyyy/MM/dd"
-					value={datePick}
-					onChange={handleDateChange}
-					KeyboardButtonProps={{
-						'aria-label': 'Cambiar fecha',
-					}}
-				/>
-			</MuiPickersUtilsProvider>
+			<TextField
+            id="email"
+            value={email}
+            onChange={(e) => set_state_email(e.target.value)}
+            className={classes.input}
+            label="email"
+            variant="outlined"
+          />
 		</div>
 	)
 }
@@ -278,30 +278,6 @@ function Informacion_seguridad() {
 			error={!equalContrasenha} 
 			/>	
 		</FormControl>
-			<div style={{ marginLeft: '20%' }}>
-				<Button variant="outlained" component="label">{foto?"Seleccionado":"Nada seleccionado"}
-				</Button>
-				<Button variant="contained" style={{ marginLeft: '3%', color: 'green' }} component="label"> Subir foto del usuario
-				<CloudUpload style={{ fontSize: 30, marginLeft: '10px' }} />
-					<Input
-						type="file"
-						onChange={e => set_file(e.target.files[0])}
-						style={{ display: "none" }}
-					/>
-				</Button>
-			</div>
-			<Snackbar open={open} autoHideDuration={3000} onClose={handleClose}
-				anchorOrigin={{ vertical, horizontal }}>
-				<Alert onClose={handleClose} severity="error">
-					{message}
-				</Alert>
-			</Snackbar>
-			<Snackbar open={open_success} autoHideDuration={3000} onClose={handleClose}
-				anchorOrigin={{ vertical, horizontal }}>
-				<Alert onClose={handleClose} severity="success">
-					archivo subido al servidor
-				</Alert>
-			</Snackbar>
 		</div>
 	)
 }
@@ -311,8 +287,6 @@ function getStepContent(step) {
 		case 0:
 			return <Informacion_basica />;
 		case 1:
-			return <Search_location />;	
-		case 2:
 			return <Informacion_seguridad />;
 		default:
 			return 'Unknown step';
@@ -330,11 +304,9 @@ export default function Formulario_empleado() {
 	const [activeStep, setActiveStep] = React.useState(0);
 	const [skipped, setSkipped] = React.useState(new Set());
 	const steps = getSteps();
-	const { usuario, coordenadas, subio_fot, datePick} = useSelector(state => ({
+	const { usuario, access} = useSelector(state => ({
 		usuario: state.redux_reducer.usuario,
-		coordenadas: state.redux_reducer.coordenadas,
-		subio_fot: state.redux_reducer.subio_fot,
-		datePick: state.redux_reducer.datePick,
+		access: state.redux_reducer.usuario.userInfo.access
 	}));
 	const dispatch = useDispatch();
 	const handleClose = () => {
@@ -346,15 +318,15 @@ export default function Formulario_empleado() {
 	const comprobar_info = () => {
 		if (usuario.id && usuario.nombre && usuario.apellido && usuario.tipoId) {
 			if (!Number(usuario.id)) {
-				set_message('la cédula no puede estar vacia y debe ser un dato tipo numérico');
+				set_message('ID no puede estar vacia y debe ser un dato tipo numérico');
 				setOpen(true);
 			}
 			else if (usuario.nombre.length === 0) {
-				set_message('el nombre no puede estar vacio');
+				set_message('El nombre no puede estar vacio');
 				setOpen(true);
 			}
 			else if (usuario.apellido.length === 0) {
-				set_message('el apellido no puede estar vacio');
+				set_message('El apellido no puede estar vacio');
 				setOpen(true);
 			}
 			else {
@@ -367,48 +339,26 @@ export default function Formulario_empleado() {
 		}
 	}
 	const subir_formulario = () => {
-
-		if (usuario.id && usuario.nombre && usuario.apellido && usuario.tipoId && usuario.contrasenha){
-			if (!Number(usuario.id) || usuario.nombre.length === 0 || usuario.apellido.length === 0 || usuario.contrasenha.length < 4 || !usuario.equalContrasenha) {
-
-				if (!Number(usuario.id)) {
-					set_message('la cédula no puede estar vacia y debe ser un dato tipo numérico');
-				}
-				if (usuario.nombre.length === 0) {
-					set_message('el nombre no puede estar vacio');
-				}
-				if (usuario.apellido.length === 0) {
-					set_message('el apellido no puede estar vacio');
-				}
-				if (usuario.contrasenha.length < 4) {
-					set_message('la contraseña debe ser mayor a 6 caracteres');
-				}
-				if (!usuario.equalContrasenha) {
-					set_message("Asegurese de repetir la contraseña");	
-				}
-				setOpen(true);
-			}
-			else {
+		        comprobar_info();
 				setOpen(false);
-				var formData = new FormData();
-				formData.append('photo', subio_fot);
-				formData.append('userInfo', JSON.stringify({
-					RestaurantUserID: parseInt(usuario.id),
-					RestaurantUserName: usuario.nombre,
-					RestaurantUserLastname: usuario.apellido,
-					RestaurantUserLatitude: parseFloat(coordenadas.lat),
-					RestaurantUserLongitude: parseFloat(coordenadas.lng),
-					RestaurantUserBirthdate: datePick,
-					RestaurantUserPass: usuario.contrasenha,
-					DocumentTypeID: usuario.tipoId
-				}));
-				fetch((process.env.REACT_APP_BACKEND || "http://localhost:4000/")+"createUser", {
+				fetch("https://bobcons.herokuapp.com/api/appUser/", {
 					method: 'POST',
-					body: formData
+					headers: {
+						"Content-Type": "application/json",
+						"Authorization": "Bearer " + access,
+					},
+					body: JSON.stringify({
+						app_user_id: usuario.id,
+						app_user_document_type: usuario.tipoId,
+						user_name:usuario.nombre,
+						last_name:usuario.apellido,
+						email:usuario.correo,
+						password:usuario.contrasenha
+					  })
 				}).then(res => res.json())
 					.then(response => {
-						if (response.status === 400) {
-							set_message(response.message);
+						if (response.status !=200) {
+							set_message(response.details);
 							setOpen(true);
 						}
 						else {
@@ -428,13 +378,9 @@ export default function Formulario_empleado() {
 					})
 					.catch(error => {
 						alert("Conexión fallida con el servidor"+error);
-					});
-			}	
-		}else{
-			set_message("Todos los campos son obligatorios");
-			setOpen(true);
-		}
+					});	
 	}
+
 	const isStepOptional = (step) => {
 		return step === 1;
 	};
@@ -509,10 +455,10 @@ export default function Formulario_empleado() {
 				{activeStep === steps.length ? (
 					<div>
 						<Typography className={classes.instructions}>
-							All steps completed - you&apos;re finished
+							Regresar a crear usuario
 						</Typography>
 						<Button onClick={handleReset} className={classes.button}>
-							handleReset
+							Ok
 						</Button>
 					</div>
 				) : (
