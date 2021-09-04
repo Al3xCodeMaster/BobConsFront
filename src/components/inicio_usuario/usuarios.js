@@ -37,7 +37,7 @@ import DateFnsUtils from "@date-io/date-fns";
 import { purple } from '@material-ui/core/colors';
 import Search_location from '../mapas/search_location';
 import {
-  set_coordinates  
+  set_coordinates, set_correo  
 } from '../../redux/actions';
 import { set } from "date-fns";
 
@@ -210,7 +210,7 @@ export default function Usuarios(){
                     <FormularioUsuario/>
                 </TabPanel>
                 <TabPanel value={value} index={1}>
-                    
+                    <EnhancedTable/>
                 </TabPanel>
             </Fragment>
     );
@@ -259,12 +259,12 @@ function TabPanel(props) {
   }
   
   const headCells = [
-    { id: 'RestaurantUserID', numeric: true, disablePadding: false, label: 'Número de identificación'},
-    { id: 'DocumentTypeID', numeric: false, disablePadding: true, label: 'Tipo de documento' },
-    { id: 'RestaurantUserName', numeric: false, disablePadding: true, label: 'Nombre' },
-    { id: 'RestaurantUserLastname', numeric: false, disablePadding: true, label: 'Apellido' },
-    { id: 'RestaurantUserModDate', numeric: false, disablePadding: true, label: 'Fecha última modif' },
-    { id:  'RestaurantUserCreationDate', numeric: false, disablePadding: true, label: 'Fecha de creación' },
+    { id: 'id', numeric: true, disablePadding: false, label: 'ID'},
+    { id: 'app_user_id', numeric: false, disablePadding: false, label: 'Número de identificación'},
+    { id: 'app_user_document_type', numeric: false, disablePadding: true, label: 'Tipo de documento' },
+    { id: 'user_name', numeric: false, disablePadding: true, label: 'Nombre' },
+    { id: 'last_name', numeric: false, disablePadding: true, label: 'Apellido' },
+    { id: 'email', numeric: false, disablePadding: true, label: 'Correo' },
   ];
   
   function EnhancedTableHead(props) {
@@ -349,18 +349,18 @@ function TabPanel(props) {
       
     switch(id){
         
-        case "RestaurantUserID":
+        case "id":
           return "Id";
-        case "DocumentTypeID":
+        case "app_user_id":
+          return "Num Doc";
+        case "app_user_document_type":
           return "Tipo de doc";
-        case "RestaurantUserName":
+        case "user_name":
           return "Nombre";
-        case "RestaurantUserLastname":
+        case "last_name":
           return "Apellidos";
-        case "RestaurantUserModDate":
-          return "Por fecha de mod";
-        case "RestaurantUserCreationDate":
-          return "Por fecha creac";
+        case "email":
+          return "correo";
         default:
           return "";           
       }
@@ -371,7 +371,7 @@ function TabPanel(props) {
         className={clsx(classes.root)}
       >
           <Typography className={classes.title} variant="h5" id="tableTitle" component="div">
-            Tabla de usuarios del restaurante
+            Tabla de usuarios
           </Typography>
           <Grid container>
             <Grid item xs={6}>
@@ -405,12 +405,12 @@ function TabPanel(props) {
     );
   };
   
-  /*  
+  
   function EnhancedTable() {
 
     const classes = useStyles();
     const [order, setOrder] = React.useState('asc');
-    const [orderBy, setOrderBy] = React.useState('RestaurantUserID');
+    const [orderBy, setOrderBy] = React.useState('id');
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
     const [rows, setRows] = React.useState([]);
@@ -419,29 +419,34 @@ function TabPanel(props) {
     const [success, set_success] = React.useState(false);
     const [success_message, set_success_message] = useState("");
     const [search, setSearch] = React.useState("");
-    const [filterCrit, setFilter] = React.useState("RestaurantUserID");
+    const [filterCrit, setFilter] = React.useState("id");
     const [openD, setOpenD] = React.useState(false);
     const vertical = "top";
     const horizontal = "right";
     const [id, setId] = React.useState(0);
-    const [typeId, setType] = React.useState("");
     const [name, setName] = React.useState("");
     const [lastName, setLastName] = React.useState("");
+    const [correo, setCorreo] = React.useState("");
     const [status, setStatus] = React.useState(false);
-    const [datePick, setDate] = React.useState(null);
-    const [picture, setPicture] = React.useState("");
-    const dispatch = useDispatch();
-    const {coordenadas} = useSelector(state => ({
-      coordenadas: state.redux_reducer.coordenadas,
+    const {access} = useSelector(state => ({
+      access: state.redux_reducer.usuario.userInfo.access
     }));
 
     const refresh = () => {
-      fetch((process.env.REACT_APP_BACKEND || "http://localhost:4000/") + "listUsers/50/0", {
+      let status;
+      fetch("https://bobcons.herokuapp.com/api/appUserGET/", {
         method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + access,
+        }
       })
-        .then((res) => res.json())
+        .then((res) => {
+          status = res.status;
+          return res.json();
+        })
         .then((response) => {
-          if (response.error) {
+          if (status != 200) {
             setRows([]);
           }else{
             setRows(response);
@@ -453,12 +458,20 @@ function TabPanel(props) {
     }
 
     useEffect(() => {
-      fetch((process.env.REACT_APP_BACKEND || "http://localhost:4000/") + "listUsers/50/0", {
+      let status;
+      fetch("https://bobcons.herokuapp.com/api/appUserGET/", {
         method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + access,
+        }
       })
-        .then((res) => res.json())
+        .then((res) => {
+          status = res.status;
+          return res.json();
+        })
         .then((response) => {
-          if (response.error) {
+          if (status != 200) {
             setRows([]);
           }else{
             setRows(response);
@@ -476,14 +489,11 @@ function TabPanel(props) {
     };
   
     const handleClick = (event, userSelected) => {
-        setId(userSelected.RestaurantUserID);
-        setType(userSelected.DocumentTypeID);
-        setName(userSelected.RestaurantUserName);
-        setLastName(userSelected.RestaurantUserLastname);
-        setStatus(userSelected.RestaurantUserStatus);
-        setDate(new Date(userSelected.RestaurantUserBirthdate));
-        setPicture(userSelected.RestaurantUserPicture);
-        dispatch(set_coordinates({ lat: userSelected.RestaurantUserLatitude, lng: userSelected.RestaurantUserLongitude}));
+        setId(userSelected.id);
+        setName(userSelected.user_name);
+        setLastName(userSelected.last_name);
+        setCorreo(userSelected.email);
+        //setStatus(userSelected.RestaurantUserStatus);
         setOpenD(true);
     };
   
@@ -501,25 +511,27 @@ function TabPanel(props) {
     };
 
     const updateUser = () => {
-      fetch((process.env.REACT_APP_BACKEND || "http://localhost:4000/") + "updateUser", {
-        method: "POST",
+      let status;
+      fetch("https://bobcons.herokuapp.com/api/appUser/"+id+"/", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + access,
+        },
         body: JSON.stringify({
-          RestaurantUserID: id,
-          RestaurantUserName: name,
-          RestaurantUserLastname: lastName,
-          RestaurantUserLatitude: parseFloat(coordenadas.lat),
-          RestaurantUserLongitude: parseFloat(coordenadas.lng),
-          RestaurantUserBirthdate: datePick,
-          RestaurantUserStatus: status,
-          DocumentTypeID: typeId,
+          user_name: name,
+          last_name: lastName,
+          email: correo,
+          is_active: status
         }), // data can be `string` or {object}!
       })
         .then((res) => {
+          status = res.status
           return res.json();
         })
         .then((response) => {
-          if(response.error){
-            set_error_message("Error: "+response.error);
+          if(status != 200){
+            set_error_message("Error: "+response.details);
             set_error(true);
           }else{
             set_success_message("Hecho");
@@ -532,11 +544,6 @@ function TabPanel(props) {
           alert(err);
         })
     }
-
-    const handleDateChange = (value) => {
-       setDate(value);
-    };
-
 
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
   
@@ -586,13 +593,13 @@ function TabPanel(props) {
                           />
                         </TableCell>
                         <TableCell component="th" id={labelId} scope="row" padding="none">
-                          {parseInt(row.RestaurantUserID)}
+                          {parseInt(row.id)}
                         </TableCell>
-                        <TableCell align="right">{row.DocumentTypeID}</TableCell>
-                        <TableCell align="right">{row.RestaurantUserName}</TableCell>
-                        <TableCell align="right">{row.RestaurantUserLastname}</TableCell>
-                        <TableCell align="right">{new Date(row.RestaurantUserCreationDate).toLocaleDateString()}</TableCell>
-                        <TableCell align="right">{new Date(row.RestaurantUserModDate).toLocaleDateString()}</TableCell>
+                        <TableCell align="right">{row.app_user_id}</TableCell>
+                        <TableCell align="right">{row.app_user_document_type}</TableCell>
+                        <TableCell align="right">{row.user_name}</TableCell>
+                        <TableCell align="right">{row.last_name}</TableCell>
+                        <TableCell align="right">{row.email}</TableCell>
                       </TableRow>
                     );
                   }):null}
@@ -624,9 +631,6 @@ function TabPanel(props) {
         <DialogTitle id="scroll-dialog-title">Modificar usuario</DialogTitle>
         <DialogContent>
         <div>
-          <div style={{display: 'flex ', alignItems: 'center'}}>
-            <Avatar src={picture.length>0?(process.env.REACT_APP_BACKEND || "http://localhost:4000/") + "file/"+picture:null} className={classes.avatar}/>   
-          </div>
         <FormControlLabel
           control={<PurpleSwitch checked={status} onChange={(e) => setStatus(!status)} name="checkedStatus" />}
           label="Activar/Desactivar usuario"
@@ -657,22 +661,19 @@ function TabPanel(props) {
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
         />
-        <MuiPickersUtilsProvider utils={DateFnsUtils}>
-            <KeyboardDatePicker
-              disableFuture
-			        fullWidth
-              margin="normal"
-              id="date-picker-birthday-user-admin"
-              label="Fecha de nacimiento"
-              format="yyyy/MM/dd"
-              value={datePick}
-              onChange={handleDateChange}
-              KeyboardButtonProps={{
-                "aria-label": "Cambiar fecha",
-              }}
-            />
-          </MuiPickersUtilsProvider>
-          <Search_location/>
+        <TextField
+          id="filled-full-width-correo"
+          label="Correo"
+          style={{ margin: 8 }}
+          fullWidth
+          margin="normal"
+          InputLabelProps={{
+            shrink: true,
+          }}
+          variant="filled"
+          value={correo}
+          onChange={(e) => setCorreo(e.target.value)}
+        />
         </div>
         </DialogContent>
         <DialogActions>
@@ -712,4 +713,4 @@ function TabPanel(props) {
          </Snackbar>
       </div>
     );
-  }*/
+  }
