@@ -1,5 +1,5 @@
 import React, { useState, Fragment, useEffect } from "react";
-import { useSelector, useDispatch, shallowEqual } from "react-redux";
+import { useSelector} from "react-redux";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import {
   TextField,
@@ -37,7 +37,6 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import Done from "@material-ui/icons/Done";
-
 
 
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -101,6 +100,10 @@ export default function Perfiles() {
   const [user_cargado, set_user_cargado] = useState([]);
   const [profiles_from_user, set_prof_from_user] = useState([]);
   const [user_temp, set_user_temp] = useState({});
+  const { usuario, access} = useSelector(state => ({
+    usuario: state.redux_reducer.usuario,
+    access: state.redux_reducer.usuario.userInfo.access
+  }));
 
   const set_state_type_id = (value) => {
     set_id_type(value);
@@ -113,20 +116,23 @@ export default function Perfiles() {
       return undefined;
     }
 
-    fetch((process.env.REACT_APP_BACKEND || "http://localhost:4000/") + "getAllDocuments", {
-      method: "GET",
-    })
-      .then((res) => res.json())
-      .then((items) => {
-        if (active) {
-          setOptions(items.map((x) => x.DocumentTypeID));
-        }
-      })
-      .catch((err) => console.log(err));
-    return () => {
-      active = false;
-    };
-  }, [loading]);
+    fetch("https://bobcons.herokuapp.com/api/documentTypeGET/", {
+				method: 'GET',
+				headers: {
+					"Content-Type": "application/json",
+					"Authorization": "Bearer " + access,
+				  },
+			}).then(res => res.json())
+			.then(items => {
+				if(active){
+					setOptions(items.map((x) => x.document_type_id));
+				}
+			})
+			.catch(err => console.log(err));
+		return () => {
+			active = false;
+		};
+	}, [loading]);
 
   React.useEffect(() => {
     if (!open) {
@@ -237,14 +243,28 @@ export default function Perfiles() {
   };
 
   const guardar_perfil = () => {
-    fetch((process.env.REACT_APP_BACKEND || "http://localhost:4000/") + "createProfile", {
+    let status
+    fetch("https://bobcons.herokuapp.com/api/group/", {
       method: "POST",
-      body: JSON.stringify(nombre_profile_temp[0]),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + access,
+      },
+      body: JSON.stringify({name: nombre_profile_temp[0].ProfileName}),
     })
-      .then((res) => res.json())
+      .then((res) => {
+        status = res.status;
+        return res.json();
+      })
       .then((response) => {
+        if(status != 200){
+          set_error(true);
+          set_error_message("Error: " + response.details);
+          return;
+        }
         set_success(true);
         set_success_message("Perfil agregado con éxito");
+        refresh();
       })
       .catch((err) => {
         set_error(true);
@@ -252,9 +272,32 @@ export default function Perfiles() {
       });
   };
 
-  useEffect(() => {
-    fetch((process.env.REACT_APP_BACKEND || "http://localhost:4000/") + "getAllProfiles", {
+  const refresh = () => {
+    fetch("https://bobcons.herokuapp.com/api/groupGET/", {
       method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + access,
+      },
+    })
+      .then((res) => res.json())
+      .then((response) => {
+        if (response.length > 0) {
+          set_fetch_profiles(response);
+        }
+      })
+      .catch((error) => {
+        alert(error);
+      });
+  }
+
+  useEffect(() => {
+    fetch("https://bobcons.herokuapp.com/api/groupGET/", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + access,
+      },
     })
       .then((res) => res.json())
       .then((response) => {
@@ -277,25 +320,31 @@ export default function Perfiles() {
   };
 
   const cambiar_nom_perfil = () => {
-    fetch((process.env.REACT_APP_BACKEND || "http://localhost:4000/") + "updateProfile", {
-      method: "POST",
+    let status;
+    fetch("https://bobcons.herokuapp.com/api/group/"+valueId+"/", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + access,
+      },
       body: JSON.stringify({
-        ProfileID: parseInt(valueId),
-        ProfileName: nombre_profile_to_change,
+        id: parseInt(valueId),
+        name: nombre_profile_to_change,
       }),
     })
-      .then((res) => res.json())
+      .then((res) => {
+        status = res.status;
+        return res.json();
+      })
       .then((response) => {
-        if (response.error) {
+        if (status != 200) {
           set_error(true);
-          set_error_message("Error: " + response.error);
+          set_error_message("Error: " + response.details);
           return;
         }
         set_success(true);
         set_success_message("Perfil cambiado con éxito");
-        if (response.length > 0) {
-          set_fetch_profiles(response);
-        }
+        refresh();
       })
       .catch((err) => {
         set_error(true);
@@ -304,14 +353,18 @@ export default function Perfiles() {
   };
 
   const buscar_id = () => {
-    fetch((process.env.REACT_APP_BACKEND || "http://localhost:4000/") + "getUser/" + id_type + "/" + id_doc, {
+    fetch("https://bobcons.herokuapp.com/api/appUserGET/" + id_doc, {
       method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + access,
+      },
     })
       .then((res) => res.json())
       .then((response) => {
-        if (response.error) {
+        if (response.detail) {
           set_error(true);
-          set_error_message("Error: " + response.error);
+          set_error_message("Error: " + response.detail);
           return;
         }
         set_user_cargado([response]);
@@ -325,24 +378,27 @@ export default function Perfiles() {
 
   const getProfilesFromUser = (id_type, id_doc) => {
     fetch(
-      (process.env.REACT_APP_BACKEND || "http://localhost:4000/") + "getAllUserProfiles/" + id_type + "/" + id_doc,
-      {
+      "https://bobcons.herokuapp.com/api/groupGET/"+id_doc,
+      {headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + access,
+      },
         method: "GET",
-      }
+      },
     )
-      .then((res) => (res.status == 204 ? [] : res.json()))
+    .then((res) => res.json())
       .then((response) => {
-        if (response.length > 0) {
-          set_prof_from_user(
-            response.map((element) => {
-              return element.ProfileID;
-            })
-          );
+        if (response.detail) {
+          return
         }
+        set_prof_from_user(
+          response.map((element) => {
+            return element.ProfileID;
+          }))
       })
       .catch((error) => {
         alert(error);
-      });
+      })
   };
 
   const quitar_perfil = (valueId) => {
@@ -427,20 +483,6 @@ export default function Perfiles() {
               onChange={(e) => set_nombre_profile(e.target.value)}
             />
           </Grid>
-          <Grid item xs={2}>
-            <FormControlLabel
-              value={activado}
-              control={
-                <Switch
-                  disabled={cargando}
-                  checked={gilad}
-                  onChange={(e) => set_state_gilad()}
-                />
-              }
-              label={activado}
-              labelPlacement="top"
-            />
-          </Grid>
           <Grid item xs={4}>
             <Button
               disabled={cargando}
@@ -471,7 +513,7 @@ export default function Perfiles() {
                 <TableRow key={element.ProfileName}>
                   <TableCell>{element.ProfileName}</TableCell>
                   <TableCell>
-                    {element.ProfileStatus ? "Activo" : "No activo"}
+                    Activo
                   </TableCell>
                   <TableCell>
                     <IconButton
@@ -515,26 +557,20 @@ export default function Perfiles() {
                 <TableCell>Id</TableCell>
                 <TableCell>Nombre</TableCell>
                 <TableCell>Estado</TableCell>
-                <TableCell>Fecha de creación</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {fetch_profiles.map((element) => (
-                <TableRow key={element.ProfileID}>
-                  <TableCell>{element.ProfileID}</TableCell>
-                  <TableCell>{element.ProfileName}</TableCell>
-                  <TableCell>
+                <TableRow key={element.id}>
+                  <TableCell>{element.id}</TableCell>
+                  <TableCell>{element.name}</TableCell>
+                  <TableCell>{"Activo"}</TableCell>
+                  {/* <TableCell>
                     {element.ProfileStatus ? "Activo" : "No activo"}
-                  </TableCell>
-                  <TableCell>
-                    {new Date(
-                          element.ProfileCreationDate
-                        ).toLocaleDateString()
-                    }
-                  </TableCell>
+                  </TableCell> */}
                   <TableCell>
                     <IconButton
-                      onClick={(e) => handleClick(e, element.ProfileID)}
+                      onClick={(e) => handleClick(e, element.id)}
                       children={
                         <EditIcon
                           style={{
@@ -586,7 +622,7 @@ export default function Perfiles() {
                       />
                     </Popover>
                   </TableCell>
-                  <TableCell>
+                  {/* <TableCell>
                     {element.ProfileStatus ? (
                       <IconButton
                         onClick={(e) =>
@@ -621,7 +657,7 @@ export default function Perfiles() {
                         }
                       />
                     )}
-                  </TableCell>
+                  </TableCell> */}
                 </TableRow>
               ))}
             </TableBody>
@@ -695,27 +731,25 @@ export default function Perfiles() {
             <TableHead>
               <TableRow>
                 <TableCell>Num. Documento</TableCell>
+                <TableCell>Tipo doc</TableCell>
                 <TableCell>Nombre </TableCell>
                 <TableCell>Apellido </TableCell>
+                <TableCell>Email </TableCell>
                 <TableCell> Estado </TableCell>
-                <TableCell>Fecha de creación</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {user_cargado.map((element) => (
-                <TableRow key={element.RestaurantUserID}>
-                  <TableCell>{element.RestaurantUserID}</TableCell>
-                  <TableCell>{element.RestaurantUserName}</TableCell>
-                  <TableCell>{element.RestaurantUserLastname}</TableCell>
+                <TableRow key={element.id}>
+                  <TableCell>{element.app_user_id}</TableCell>
+                  <TableCell>{element.app_user_document_type}</TableCell>
+                  <TableCell>{element.user_name}</TableCell>
+                  <TableCell>{element.last_name}</TableCell>
                   <TableCell>
-                    {element.RestaurantUserStatus ? "Activo" : "No activo"}
+                    {element.email}
                   </TableCell>
                   <TableCell>
-                    {
-                      new Date(
-                          element.RestaurantUserCreationDate
-                        ).toLocaleDateString()
-                    }
+                    {"Activo"}
                   </TableCell>
                 </TableRow>
               ))}
@@ -733,23 +767,17 @@ export default function Perfiles() {
                 <TableCell>Id</TableCell>
                 <TableCell>Nombre</TableCell>
                 <TableCell>Estado</TableCell>
-                <TableCell>Fecha de creación</TableCell>
                 <TableCell>Asignado/Asignar</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {user_cargado.length > 0
                 ? fetch_profiles.map((element) => (
-                    <TableRow key={element.ProfileID}>
-                      <TableCell>{element.ProfileID}</TableCell>
-                      <TableCell>{element.ProfileName}</TableCell>
+                    <TableRow key={element.id}>
+                      <TableCell>{element.id}</TableCell>
+                      <TableCell>{element.name}</TableCell>
                       <TableCell>
-                        {element.ProfileStatus ? "Activo" : "No activo"}
-                      </TableCell>
-                      <TableCell>
-                          {new Date(
-                              element.ProfileCreationDate
-                            ).toLocaleDateString()}
+                        {"Activo"}
                       </TableCell>
                       <TableCell>
                         {profiles_from_user.length > 0 ? (

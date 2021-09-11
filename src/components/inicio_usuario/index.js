@@ -204,6 +204,7 @@ export default function Dashboard_empleado() {
           <Container maxWidth="lg" className={classes.container}>
           <Switch>
               <Route path="/admin/usuarios" component={Usuarios} />
+              <Route path="/admin/perfiles" component={Profiles} />
               <Route path="/" component={DashboardUser} />
             </Switch>
           </Container>
