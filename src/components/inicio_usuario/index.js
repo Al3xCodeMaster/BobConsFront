@@ -16,6 +16,7 @@ import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import { mainListItems, secondaryListItems } from './listItems';
 import { BrowserRouter, Route, Redirect, Switch, Router } from 'react-router-dom';
 import Usuarios from './usuarios';
+import Clientes from './clientes'
 import DashboardUser from './dashboard';
 import Profiles from './perfiles';
 import Products from './products';
@@ -205,6 +206,7 @@ export default function Dashboard_empleado() {
           <Switch>
               <Route path="/admin/usuarios" component={Usuarios} />
               <Route path="/admin/perfiles" component={Profiles} />
+              <Route path="/admin/clientes" component={Clientes} />
               <Route path="/" component={DashboardUser} />
             </Switch>
           </Container>

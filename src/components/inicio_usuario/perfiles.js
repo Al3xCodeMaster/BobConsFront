@@ -378,7 +378,7 @@ export default function Perfiles() {
 
   const getProfilesFromUser = (id_type, id_doc) => {
     fetch(
-      "https://bobcons.herokuapp.com/api/groupGET/"+id_doc,
+      "https://bobcons.herokuapp.com/api/userGroup/"+id_doc,
       {headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer " + access,
@@ -388,13 +388,9 @@ export default function Perfiles() {
     )
     .then((res) => res.json())
       .then((response) => {
-        if (response.detail) {
-          return
-        }
-        set_prof_from_user(
-          response.map((element) => {
-            return element.ProfileID;
-          }))
+        set_prof_from_user(response.map((item) =>{
+          return item.id
+        }))
       })
       .catch((error) => {
         alert(error);
@@ -402,20 +398,23 @@ export default function Perfiles() {
   };
 
   const quitar_perfil = (valueId) => {
-    fetch((process.env.REACT_APP_BACKEND || "http://localhost:4000/") + "updateProfileUser", {
-      method: "POST",
-      body: JSON.stringify({
-        ProfileID: parseInt(valueId),
-        RestaurantUserID: user_temp.RestaurantUserID,
-        DocumentTypeID: user_temp.DocumentTypeID,
-        UserProfileStatus: false,
-      }),
+    let status
+    fetch("https://bobcons.herokuapp.com/api/userGroup/"+user_temp.id, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + access,
+      }
     })
-      .then((res) => res.json())
+      .then((res) =>{
+        status = res.status;
+        res.json();
+      } 
+      )
       .then((response) => {
-        if (response.error) {
+        if (status != 200) {
           set_error(true);
-          set_error_message("Error: " + response.error);
+          set_error_message("Error: " + response);
           return;
         }
         buscar_id();
@@ -429,20 +428,27 @@ export default function Perfiles() {
   };
 
   const asignar_perfil = (valueId) => {
-    fetch((process.env.REACT_APP_BACKEND || "http://localhost:4000/") + "assignProfileToUser", {
+    let status;
+    fetch("https://bobcons.herokuapp.com/api/userGroup/", {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + access
+      },
       body: JSON.stringify({
-        ProfileID: parseInt(valueId),
-        RestaurantUserID: user_temp.RestaurantUserID,
-        DocumentTypeID: user_temp.DocumentTypeID,
-        UserProfileStatus: true,
+        id: user_temp.id,
+        group: parseInt(valueId)
       }),
+      
     })
-      .then((res) => res.json())
+      .then((res) => {
+        status = res.status;
+        res.json();
+      })
       .then((response) => {
-        if (response.error) {
+        if (status!=200) {
           set_error(true);
-          set_error_message("Error: " + response.error);
+          set_error_message("Error: Este usuario ya tiene asignado un perfil");
           return;
         }
         buscar_id();
@@ -781,9 +787,9 @@ export default function Perfiles() {
                       </TableCell>
                       <TableCell>
                         {profiles_from_user.length > 0 ? (
-                          profiles_from_user.includes(element.ProfileID) ? (
+                          profiles_from_user.includes(element.id) ? (
                             <IconButton
-                              onClick={(e) => quitar_perfil(element.ProfileID)}
+                              onClick={(e) => quitar_perfil(element.id)}
                               children={
                                 <CheckBoxIcon
                                   style={{ fontSize: 25, marginLeft: "5px" }}
@@ -792,7 +798,7 @@ export default function Perfiles() {
                             />
                           ) : (
                             <IconButton
-                              onClick={(e) => asignar_perfil(element.ProfileID)}
+                              onClick={(e) => asignar_perfil(element.id)}
                               children={
                                 <CheckBoxOutlineBlankIcon
                                   style={{ fontSize: 25, marginLeft: "5px" }}
@@ -802,7 +808,7 @@ export default function Perfiles() {
                           )
                         ) : (
                           <IconButton
-                            onClick={(e) => asignar_perfil(element.ProfileID)}
+                            onClick={(e) => asignar_perfil(element.id)}
                             children={
                               <CheckBoxOutlineBlankIcon
                                 style={{ fontSize: 25, marginLeft: "5px" }}

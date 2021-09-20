@@ -10,6 +10,7 @@ import { Link } from 'react-router-dom';
 import RestaurantIcon from '@material-ui/icons/Restaurant';
 import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
 import BarChartIcon from '@material-ui/icons/BarChart';
+import AddReactionIcon from '@material-ui/icons/AccountCircleOutlined';
 
 export const mainListItems = (
   <div>
@@ -31,15 +32,15 @@ export const mainListItems = (
       </ListItemIcon>
       <ListItemText primary="Perfiles" />
     </ListItem>
-    <ListItem button component={Link} to='/admin/productos'>
+    <ListItem button component={Link} to='/admin/clientes'>
       <ListItemIcon>
-      <AddAPhoto/>
+      <AddReactionIcon/>
       </ListItemIcon>
-      <ListItemText primary="Producto" />
+      <ListItemText primary="Clientes" />
     </ListItem>
-    <ListItem button component={Link} to='/admin/restaurantes'>
+    <ListItem button component={Link} to='/admin/produc'>
       <ListItemIcon>
-      <RestaurantIcon/>
+      <AddReactionIcon/>
       </ListItemIcon>
       <ListItemText primary="Restaurantes" />
     </ListItem>
