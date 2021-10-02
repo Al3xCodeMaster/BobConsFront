@@ -7,7 +7,7 @@ import PersonAddIcon from '@material-ui/icons/PersonAdd';
 import GroupAddIcon from '@material-ui/icons/GroupAdd';
 import AddAPhoto from '@material-ui/icons/AddAPhoto';
 import { Link } from 'react-router-dom';
-import RestaurantIcon from '@material-ui/icons/Restaurant';
+import SupplierIcon from '@material-ui/icons/DragHandleRounded';
 import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
 import BarChartIcon from '@material-ui/icons/BarChart';
 import AddReactionIcon from '@material-ui/icons/AccountCircleOutlined';
@@ -38,17 +38,17 @@ export const mainListItems = (
       </ListItemIcon>
       <ListItemText primary="Clientes" />
     </ListItem>
-    <ListItem button component={Link} to='/admin/produc'>
+    <ListItem button component={Link} to='/proveedores'>
       <ListItemIcon>
-      <AddReactionIcon/>
+      <SupplierIcon/>
       </ListItemIcon>
-      <ListItemText primary="Restaurantes" />
+      <ListItemText primary="Proveedores" />
     </ListItem>
-    <ListItem button component={Link} to='/admin/bancos'>
+    <ListItem button component={Link} to='/materiales'>
       <ListItemIcon>
       <AccountBalanceIcon/>
       </ListItemIcon>
-      <ListItemText primary="Bancos" />
+      <ListItemText primary="Materiales" />
     </ListItem>
     <ListItem button component={Link} to='/usuario/reportes'>
       <ListItemIcon>

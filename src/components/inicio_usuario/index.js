@@ -22,8 +22,8 @@ import Profiles from './perfiles';
 import Products from './products';
 import { createMuiTheme } from '@material-ui/core/styles';
 import { ThemeProvider } from '@material-ui/styles';
-import Restaurants from './restaurants';
-import Banks from './banks';
+import Suppliers from './suppliers';
+import Material from './material';
 import Reports from './reports';
 import { useSelector, useDispatch } from "react-redux";
 import { set_log_out } from "../../redux/actions";
@@ -207,6 +207,8 @@ export default function Dashboard_empleado() {
               <Route path="/admin/usuarios" component={Usuarios} />
               <Route path="/admin/perfiles" component={Profiles} />
               <Route path="/admin/clientes" component={Clientes} />
+              <Route path="/materiales" component={Material} />
+              <Route path="/proveedores" component={Suppliers} />
               <Route path="/" component={DashboardUser} />
             </Switch>
           </Container>

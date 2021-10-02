@@ -20,7 +20,7 @@ import Switch from "@material-ui/core/Switch";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 import Done from "@material-ui/icons/Done";
-
+import { useSelector, useDispatch} from "react-redux";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -54,9 +54,12 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Banks() {
     const classes = useStyles();
-  const [fetch_bancos, set_fetch_bancos] = useState([]);
-  const [nombre_banco, set_nombre_banco] = useState("");
-  const [nombre_banco_temp, set_nombre_banco_temp] = useState([]);
+  const [fetch_materials, set_fetch_materials] = useState([]);
+  const [nit, set_nit] = useState("");
+  const [mat_temp, set_mat_temp] = useState([]);
+  const [mat_name, set_name] = useState("");
+  const [mat_und, set_und] = useState("");
+  const [detail, set_detail] = useState("");
   const [cargando, set_cargando] = useState(false);
   const [error, set_error] = React.useState(false);
   const [error_message, set_error_message] = useState("");
@@ -66,46 +69,52 @@ export default function Banks() {
   const [gilad, set_gilad] = useState(true);
   const vertical = "top";
   const horizontal = "right";  
+  const { usuario, access} = useSelector(state => ({
+    usuario: state.redux_reducer.usuario,
+    access: state.redux_reducer.usuario.userInfo.access
+  }));
 
-  const set_state_gilad = () => {
-    set_gilad(!gilad);
-    set_activado(!gilad ? "Activo" : "No activo");
-  };
-
-  const add_banco = () => {
-    let temp_bancos = nombre_banco_temp;
-    temp_bancos.filter((x) => x.BankID === nombre_banco).length === 0
-      ? temp_bancos.push({
-          BankID: nombre_banco,
-          BankStatus: gilad,
+  const add_material = () => {
+    let temp_material = mat_temp;
+    temp_material.filter((x) => x.nit === nit).length === 0
+      ? temp_material.push({
+          nit: nit,
+          name: mat_name,
+          und: mat_und,
+          detail: detail
         })
-      : set_error_message("Ya se ha creado este perfil");
-    set_nombre_banco_temp(temp_bancos);
-    set_nombre_banco("");
-    set_gilad(true);
+      : set_error_message("Este material ya fue creado");
+      set_mat_temp(temp_material);
+    set_nit("");
+    set_name("");
+    set_und("");
+    set_detail("");
     set_cargando(true);
   };
 
-  const eliminar_banco_temp = (value) => {
-    let temp = nombre_banco_temp;
-    console.log(value);
+  const eliminar_material_temp = (value) => {
+    let temp = mat_temp;
     for (let i = 0; i < temp.length; i++) {
-      if (value === temp[i].BankID) {
+      if (value === temp[i].nit) {
         temp.splice(i, 1);
       }
     }
-    set_nombre_banco_temp(temp);
+    set_mat_temp(temp);
     set_cargando(false);
   };
 
   useEffect(() => {
-    fetch((process.env.REACT_APP_BACKEND || "http://localhost:4000/") + "getAllBanks", {
+    fetch("https://bobcons.herokuapp.com/api/materialGET/", {
       method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + access
+      },
     })
       .then((res) => res.json())
       .then((response) => {
         if (response.length > 0) {
-            set_fetch_bancos(response);
+            set_fetch_materials(response);
         }
       })
       .catch((error) => {
@@ -114,35 +123,55 @@ export default function Banks() {
   }, []);
 
   const refresh = () => {
-    fetch((process.env.REACT_APP_BACKEND || "http://localhost:4000/") + "getAllBanks", {
-        method: "GET",
-      })
-        .then((res) => res.json())
-        .then((response) => {
-          if (response.length > 0) {
-              set_fetch_bancos(response);
-          }
-        })
-        .catch((error) => {
-          alert(error);
-        });
-  }
-
-  const guardar_banco = () => {
-    fetch((process.env.REACT_APP_BACKEND || "http://localhost:4000/") + "createBank", {
-      method: "POST",
-      body: JSON.stringify(nombre_banco_temp[0]),
+    fetch("https://bobcons.herokuapp.com/api/materialGET/", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + access
+      },
     })
       .then((res) => res.json())
       .then((response) => {
-        if(response.error){
+        if (response.length > 0) {
+            set_fetch_materials(response);
+        }
+      })
+      .catch((error) => {
+        alert(error);
+      });
+  }
+
+  const save_material = () => {
+    let status;
+    fetch("https://bobcons.herokuapp.com/api/material/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + access
+      },
+      body: JSON.stringify({
+        supplier_nit: mat_temp[0].nit,
+        material_name: mat_temp[0].name,
+        material_und: mat_temp[0].und,
+        material_detail: mat_temp[0].detail
+      }),
+    })
+      .then((res) => {
+        status = res.status;
+        res.json();
+      })
+      .then((response) => {
+        if(status != 200){
             set_error_message("Error en la creación: " + response.error);
             set_error(true);
         }else{
-            set_success_message("Banco agregado con éxito");
+            set_success_message("Material agregado con éxito");
             set_success(true);
-            set_nombre_banco_temp([]);
-            set_nombre_banco("");
+            set_mat_temp([]);
+            set_nit("");
+            set_name("");
+            set_und("");
+            set_detail("");
             refresh();
         }  
       })
@@ -151,23 +180,34 @@ export default function Banks() {
       });
   };
 
-  const update_banco = (valueId, status) => {
-    fetch((process.env.REACT_APP_BACKEND || "http://localhost:4000/") + "updateBank", {
-      method: "POST",
+  const update_material = (obj, status) => {
+    let statusUp;
+    fetch("https://bobcons.herokuapp.com/api/material/"+obj.material_id+"/", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + access
+      },
       body: JSON.stringify({
-        BankID: valueId,
-        BankStatus: status
+        material_id: obj.material_id,
+        supplier_nit: obj.supplier_nit,
+        material_name: obj.material_name,
+        material_und: obj.material_und,
+        material_detail: obj.material_detail,
+        material_status: status
       }),
     })
-      .then((res) => res.json())
+      .then((res) => {
+        statusUp = res.status;
+        res.json();})
       .then((response) => {
-        if (response.error) {
+        if (statusUp != 200) {
           set_error(true);
-          set_error_message("Error: " + response.error);
+          set_error_message("Error: " + response.details);
           return;
         }
         refresh();
-        set_success_message("Banco cambiado con éxito");
+        set_success_message("Material cambiado con éxito");
         set_success(true);
       })
       .catch((err) => {
@@ -179,35 +219,53 @@ export default function Banks() {
     return(
         <Fragment>
             <Grid container className={classes.root} spacing={5}>
-            <Grid item xs={6}>
+            <Grid item xs={3}>
                 <TextField
-                id="standard-textarea-bank"
-                label="Nombre del banco"
+                id="standard-textarea-material-nit"
+                label="Nit proveedor"
                 disabled={cargando}
                 fullWidth
-                value={nombre_banco}
-                onChange={(e) => set_nombre_banco(e.target.value)}
+                value={nit}
+                onChange={(e) => set_nit(e.target.value)}
                 />
             </Grid>
-            <Grid item xs={2}>
-                <FormControlLabel
-                value={activado}
-                control={
-                    <Switch
+            <Grid item xs={3}>
+                <TextField
+                    id="standard-textarea-material-name"
+                    label="Nombre del material"
                     disabled={cargando}
-                    checked={gilad}
-                    onChange={(e) => set_state_gilad()}
-                    />
-                }
-                label={activado}
-                labelPlacement="top"
+                    fullWidth
+                    value={mat_name}
+                    onChange={(e) => set_name(e.target.value)}
+                />
+            </Grid>
+            <Grid item xs={3}>
+                <TextField
+                    id="standard-textarea-material-und"
+                    label="Unidad"
+                    disabled={cargando}
+                    fullWidth
+                    value={mat_und}
+                    onChange={(e) => set_und(e.target.value)}
+                />
+            </Grid>
+            <Grid item xs={3}>
+                <TextField
+                    id="standard-textarea-material-detail"
+                    label="Detalle"
+                    disabled={cargando}
+                    multiline
+                    rows={1}
+                    fullWidth
+                    value={detail}
+                    onChange={(e) => set_detail(e.target.value)}
                 />
             </Grid>
             <Grid item xs={4}>
                 <Button
                 disabled={cargando}
                 style={{ color: "green", marginLeft: "1%" }}
-                onClick={(e) => add_banco()}
+                onClick={(e) => add_material()}
                 >
                 Agregar
                 <CheckCircleOutline
@@ -218,27 +276,35 @@ export default function Banks() {
             </Grid>
             <h3 style={{ textAlign: "center", color: "gray" }}>
             {" "}
-            Banco a guardar
+            Material a Guardar
             </h3>
             <TableContainer component={Paper} style={{ width: "100%" }}>
             <Table stickyHeader={true} aria-label="simple table">
                 <TableHead>
                 <TableRow>
-                    <TableCell>Nombre del Banco</TableCell>
-                    <TableCell>Estado</TableCell>
+                    <TableCell>Nit material</TableCell>
+                    <TableCell>Nombre</TableCell>
+                    <TableCell>UND</TableCell>
+                    <TableCell>Detalle</TableCell>
                 </TableRow>
                 </TableHead>
                 <TableBody>
-                {nombre_banco_temp.map((element) => (
-                    <TableRow key={element.bancoName}>
-                    <TableCell>{element.BankID}</TableCell>
+                {mat_temp.map((element) => (
+                    <TableRow key={element.nit}>
+                    <TableCell>{element.nit}</TableCell>
                     <TableCell>
-                        {element.BankStatus ? "Activo" : "No activo"}
+                        {element.name}
+                    </TableCell>
+                    <TableCell>
+                        {element.und}
+                    </TableCell>
+                    <TableCell>
+                        {element.detail}
                     </TableCell>
                     <TableCell>
                         <IconButton
                         onClick={(e) =>
-                            eliminar_banco_temp(element.BankID)
+                          eliminar_material_temp(element.nit)
                         }
                         children={
                             <DeleteOutline
@@ -261,35 +327,40 @@ export default function Banks() {
                 style={{ color: "white", backgroundColor: "green" }}
                 variant="contained"
                 endIcon={<Done />}
-                onClick={(e) => guardar_banco()}
+                onClick={(e) => save_material()}
             >
-                REGISTRAR BANCO
+                REGISTRAR MATERIAL
             </Button>
             </div>
             <br></br>
             <h3 style={{ textAlign: "center", color: "gray" }}>
-            Bancos registrados
+            Materiales creados
             </h3>
             <TableContainer component={Paper} style={{ width: "97%" }}>
             <Table stickyHeader={true} aria-label="simple table">
                 <TableHead>
                 <TableRow>
-                    <TableCell>BankID</TableCell>
-                    <TableCell>Estado</TableCell>
+                    <TableCell>Nit material</TableCell>
+                    <TableCell>Nombre</TableCell>
+                    <TableCell>UND</TableCell>
+                    <TableCell>Detalle</TableCell>
                 </TableRow>
                 </TableHead>
                 <TableBody>
-                {fetch_bancos.map((element) => (
-                    <TableRow key={element.BankID}>
-                    <TableCell>{element.BankID}</TableCell>
+                {fetch_materials.map((element) => (
+                    <TableRow key={element.supplier_nit}>
+                    <TableCell>{element.supplier_nit}</TableCell>
+                    <TableCell>{element.material_name}</TableCell>
+                    <TableCell>{element.material_und}</TableCell>
+                    <TableCell>{element.material_detail}</TableCell>
                     <TableCell>
-                        {element.BankStatus ? "Activo" : "No activo"}
+                        {element.material_status ? "Activo" : "No activo"}
                     </TableCell>
                     <TableCell>
-                        {element.BankStatus ? (
+                        {element.material_status ? (
                         <IconButton
                             onClick={(e) =>
-                                update_banco(element.BankID, false)
+                                update_material(element, false)
                             }
                             children={
                             <DeleteOutline
@@ -304,7 +375,7 @@ export default function Banks() {
                         ) : (
                         <IconButton
                             onClick={(e) =>
-                                update_banco(element.BankID, true)
+                                update_material(element, true)
                             }
                             children={
                             <AddCircleIcon
