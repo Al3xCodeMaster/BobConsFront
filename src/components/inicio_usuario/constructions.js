@@ -19,6 +19,7 @@ import Paper from "@material-ui/core/Paper";
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import CircularProgress from "@material-ui/core/CircularProgress";
 import EditIcon from "@material-ui/icons/Edit";
+import AddIcon from "@material-ui/icons/Add";
 import Done from "@material-ui/icons/Done";
 import { useSelector, useDispatch} from "react-redux";
 import DateFnsUtils from '@date-io/date-fns';
@@ -73,16 +74,31 @@ export default function Banks() {
   const [options, setOptions] = useState([]);
 	const [open, setOpen] = useState(false);
   const [openD, setOpenD] = React.useState(false);
+  const [openDStock, setOpenDStock] = React.useState(false);
 	const loading = open && options.length === 0;
   const [selectedDateOne, setSelectedDateOne] = React.useState(new Date(Date.now()));
   const [selectedDateTwo, setSelectedDateTwo] = React.useState(new Date(Date.now()));
   const [selectedDateThree, setSelectedDateThree] = React.useState(new Date(Date.now()));
   const [constID, setConstID] = React.useState("");
-  const [valueState, setValueState] = React.useState("ACTIVO");  
+  const [valueState, setValueState] = React.useState("ACTIVO");
+  const [amount, setAmount] = React.useState(0);
+  const [optionsMat, setOptionsMat] = useState([]);
+  const [openStock, setOpenStock] = useState(false);
+  const loadingStock = openStock && optionsMat.length === 0;
+  const [idMat, setIdMat] = React.useState("");  
   const { usuario, access} = useSelector(state => ({
     usuario: state.redux_reducer.usuario,
     access: state.redux_reducer.usuario.userInfo.access
   }));
+
+  const handleClickPlus = (item) => {
+    setConstID(item.construction_id);
+    setOpenDStock(true);
+  }
+
+  const handleClickPlusClose = () => {
+    setOpenDStock(false);
+  }
 
   const handleClick = (item) => {
     setSelectedDateThree(new Date(item.construction_final_date));
@@ -130,7 +146,6 @@ export default function Banks() {
     set_cargando(false);
   };
 
-
   React.useEffect(() => {
 		let active = true;
 
@@ -161,6 +176,7 @@ export default function Banks() {
 		  setOptions([]);
 		}
 	  }, [open]);
+  
 
   useEffect(() => {
     fetch("https://bobcons.herokuapp.com/api/constructionGET/", {
@@ -235,6 +251,38 @@ export default function Banks() {
       });
   };
 
+  const createStock = () => {
+    let status;
+    fetch("https://bobcons.herokuapp.com/api/stock/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + access
+      },
+      body: JSON.stringify({
+        construction_id: constID,
+        material_id: idMat,
+        stock_amount: amount
+      }),
+    })
+      .then((res) => {
+        status = res.status;
+        res.json();
+      })
+      .then((response) => {
+        if(status != 200){
+            set_error_message("Error en la creación");
+            set_error(true);
+        }else{
+            set_success_message("Stock creado con éxito");
+            set_success(true);
+        }  
+      })
+      .catch((err) => {
+          alert("Error con el servidor: "+err);
+      });
+  }
+
   const updateCons = () => {
     let status;
     fetch("https://bobcons.herokuapp.com/api/construction/"+constID+"/", {
@@ -268,6 +316,37 @@ export default function Banks() {
         alert(err);
       })
   }
+
+  React.useEffect(() => {
+		let active = true;
+
+		if (!loadingStock) {
+			return undefined;
+		}
+
+		fetch("https://bobcons.herokuapp.com/api/materialGET/", {
+				method: 'GET',
+				headers: {
+					"Content-Type": "application/json",
+					"Authorization": "Bearer " + access,
+				  },
+			}).then(res => res.json())
+			.then(items => {
+				if(active){
+					setOptionsMat(items.map((x) => {return{id: x.material_id, label: x.material_name}}));
+				}
+			})
+			.catch(err => console.log(err));
+		return () => {
+			active = false;
+		};
+	}, [loadingStock]);
+
+	React.useEffect(() => {
+		if (!openStock) {
+		  setOptionsMat([]);
+		}
+	  }, [openStock ]);
 
 
     return(
@@ -446,6 +525,14 @@ export default function Banks() {
                             }
                     />
                     </TableCell>
+                    <TableCell>
+                    <IconButton
+                            onClick={ () => handleClickPlus(element)}
+                            children={
+                              <AddIcon/>
+                            }
+                    />
+                    </TableCell>
                     </TableRow>
                 ))}
                 </TableBody>
@@ -499,7 +586,73 @@ export default function Banks() {
           </Button>
         </DialogActions>
       </Dialog>
-            <Snackbar
+
+
+      <Dialog
+          open={openDStock}
+          onClose={handleClose}
+          scroll='body'
+          aria-labelledby="scroll-dialog-title"
+          aria-describedby="scroll-dialog-description"
+        >
+        <DialogTitle id="scroll-dialog-title-mat">Crear Stock</DialogTitle>
+        <DialogContent>
+        <div>
+        <Autocomplete
+						id="async-autocompl-stock-mat-const"
+						open={openStock}
+						onOpen={() => {
+							setOpenStock(true);
+						}}
+						onClose={() => {
+							setOpenStock(false);
+						}}
+						getOptionSelected={(option, value) => option === value}
+						onChange={(event, newValue) => {
+							setIdMat(newValue.id);
+						}}
+						getOptionLabel={(option) => option.label}
+						options={optionsMat}
+						loading={loadingStock}
+						renderInput={(params) => (
+							<TextField 
+								{...params}
+								className={classes.input}
+								label="Material"
+								variant="outlined"
+								InputProps={{
+									...params.InputProps,
+									endAdornment: (
+										<React.Fragment>
+											{loading ? <CircularProgress color="inherit" size={20} /> : null}
+											{params.InputProps.endAdornment}
+										</React.Fragment>
+									),
+                    }}
+                  />
+                )}
+              />
+        <br></br>
+        <TextField
+                    id="standard-textarea-stock-amount-const"
+                    label="Cantidad/UND"
+                    fullWidth
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+        />
+        </div>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClickPlusClose} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={createStock} color="primary">
+            Guardar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+        <Snackbar
         open={error}
         autoHideDuration={2000}
         anchorOrigin={{ vertical, horizontal }}
