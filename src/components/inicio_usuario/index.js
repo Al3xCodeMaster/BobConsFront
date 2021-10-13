@@ -19,7 +19,7 @@ import Usuarios from './usuarios';
 import Clientes from './clientes'
 import DashboardUser from './dashboard';
 import Profiles from './perfiles';
-import Products from './products';
+import Constructions from './constructions';
 import { createMuiTheme } from '@material-ui/core/styles';
 import { ThemeProvider } from '@material-ui/styles';
 import Suppliers from './suppliers';
@@ -209,6 +209,7 @@ export default function Dashboard_empleado() {
               <Route path="/admin/clientes" component={Clientes} />
               <Route path="/materiales" component={Material} />
               <Route path="/proveedores" component={Suppliers} />
+              <Route path="/constructions" component={Constructions} />
               <Route path="/" component={DashboardUser} />
             </Switch>
           </Container>

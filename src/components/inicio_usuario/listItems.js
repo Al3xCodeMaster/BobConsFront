@@ -10,6 +10,7 @@ import { Link } from 'react-router-dom';
 import SupplierIcon from '@material-ui/icons/DragHandleRounded';
 import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
 import BarChartIcon from '@material-ui/icons/BarChart';
+import BuildOutlined from '@material-ui/icons/BuildOutlined';
 import AddReactionIcon from '@material-ui/icons/AccountCircleOutlined';
 
 export const mainListItems = (
@@ -50,11 +51,11 @@ export const mainListItems = (
       </ListItemIcon>
       <ListItemText primary="Materiales" />
     </ListItem>
-    <ListItem button component={Link} to='/usuario/reportes'>
+    <ListItem button component={Link} to='/constructions'>
       <ListItemIcon>
-      <BarChartIcon/>
+      <BuildOutlined/>
       </ListItemIcon>
-      <ListItemText primary="Reportes" />
+      <ListItemText primary="Obras" />
     </ListItem>
   </div>
 );
