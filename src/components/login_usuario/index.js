@@ -30,7 +30,7 @@ const theme = createMuiTheme({
     palette: {
       primary: {
         // Purple and green play nicely together.
-        main: '#FF0000',
+        main: '#F8DB66',
       },
       secondary: {
         // This is green.A700 as hex.
