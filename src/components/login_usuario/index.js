@@ -162,7 +162,7 @@ const Login_usuario = () => {
               fullWidth
               variant="contained"
               onClick={() => ingresar()}
-              style={{ background: '#E61717', MozBorderRadius: 40, color: 'white', fontSize: 20, font: 'bold' }}
+              style={{ background: '#2b8b4b', MozBorderRadius: 40, color: 'white', fontSize: 20, font: 'bold' }}
               className={classes.submit}
             >
               Ingresar
