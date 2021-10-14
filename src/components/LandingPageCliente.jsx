@@ -14,6 +14,22 @@ import {
   KeyboardDatePicker,
 } from '@material-ui/pickers';
 import Swal from 'sweetalert2';
+import { createMuiTheme } from '@material-ui/core/styles';
+import { ThemeProvider } from '@material-ui/styles';
+
+
+const theme = createMuiTheme({
+    palette: {
+      primary: {
+        // Purple and green play nicely together.
+        main: '#F8DB66',
+      },
+      secondary: {
+        // This is green.A700 as hex.
+        main: '#2b8b4b',
+      },
+    },
+  });
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -24,7 +40,7 @@ const useStyles = makeStyles((theme) => ({
   },
   avatar: {
     margin: theme.spacing(1),
-    backgroundColor: theme.palette.secondary.main,
+    backgroundColor: '#F8DB66',
   },
   form: {
     width: '100%', // Fix IE 11 issue.
@@ -51,11 +67,12 @@ const LandingPageCliente = () => {
 
 
   return (
-    <Container component="main" maxWidth="xs">
+    <ThemeProvider theme={theme}>
+      <Container component="main" maxWidth="xs">
       <CssBaseline />
       <div className={classes.paper}>
         <Avatar className={classes.avatar}>
-          <ApartmentIcon />
+          <ApartmentIcon color="secondary"/>
         </Avatar>
         <Typography component="h1" variant="h5">
           Consulta de Obras
@@ -80,7 +97,7 @@ const LandingPageCliente = () => {
             type="submit"
             fullWidth
             variant="contained"
-            color="primary"
+            color="secondary"
             className={classes.submit}
           >
             Consultar
@@ -88,6 +105,7 @@ const LandingPageCliente = () => {
         </form>
       </div>
     </Container>
+    </ThemeProvider>
   );
 }
 
