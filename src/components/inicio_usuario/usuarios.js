@@ -493,7 +493,7 @@ function TabPanel(props) {
         setName(userSelected.user_name);
         setLastName(userSelected.last_name);
         setCorreo(userSelected.email);
-        //setStatus(userSelected.RestaurantUserStatus);
+        setStatus(userSelected.is_active);
         setOpenD(true);
     };
   
@@ -511,7 +511,7 @@ function TabPanel(props) {
     };
 
     const updateUser = () => {
-      let status;
+      let statusUp;
       fetch("https://bobcons.herokuapp.com/api/appUser/"+id+"/", {
         method: "PATCH",
         headers: {
@@ -526,11 +526,11 @@ function TabPanel(props) {
         }), // data can be `string` or {object}!
       })
         .then((res) => {
-          status = res.status
+          statusUp = res.status
           return res.json();
         })
         .then((response) => {
-          if(status != 200){
+          if(statusUp != 200){
             set_error_message("Error: "+response.details);
             set_error(true);
           }else{
@@ -577,9 +577,9 @@ function TabPanel(props) {
   
                     return (
                       <TableRow
-                        hover={row.RestaurantUserStatus}
+                        hover={row.is_active}
                         style={
-                          row.RestaurantUserStatus ? { opacity: 1 } : { opacity: 0.5 }
+                          row.is_active ? { opacity: 1 } : { opacity: 0.5 }
                         }
                         onClick={(event) => handleClick(event, row)}
                         tabIndex={-1}

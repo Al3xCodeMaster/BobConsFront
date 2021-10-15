@@ -12,6 +12,9 @@ import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
 import BarChartIcon from '@material-ui/icons/BarChart';
 import BuildOutlined from '@material-ui/icons/BuildOutlined';
 import AddReactionIcon from '@material-ui/icons/AccountCircleOutlined';
+import SupervisorAccountTwoTone from '@material-ui/icons/LabelImportantSharp';
+import MapOutlined from '@material-ui/icons/MapOutlined';
+import PriorityHigh from '@material-ui/icons/PriorityHigh';
 
 export const mainListItems = (
   <div>
@@ -56,6 +59,30 @@ export const mainListItems = (
       <BuildOutlined/>
       </ListItemIcon>
       <ListItemText primary="Obras" />
+    </ListItem>
+    <ListItem button component={Link} to='/stock'>
+      <ListItemIcon>
+      <SupervisorAccountTwoTone/>
+      </ListItemIcon>
+      <ListItemText primary="Stock" />
+    </ListItem>
+    <ListItem button component={Link} to='/reportes'>
+      <ListItemIcon>
+      <BarChartIcon/>
+      </ListItemIcon>
+      <ListItemText primary="Reportes" />
+    </ListItem>
+    <ListItem button component={Link} to='/planos'>
+      <ListItemIcon>
+      <MapOutlined/>
+      </ListItemIcon>
+      <ListItemText primary="Planos" />
+    </ListItem>
+    <ListItem button component={Link} to='/progreso'>
+      <ListItemIcon>
+      <PriorityHigh/>
+      </ListItemIcon>
+      <ListItemText primary="Progeso" />
     </ListItem>
   </div>
 );

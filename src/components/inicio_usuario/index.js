@@ -24,7 +24,10 @@ import { createMuiTheme } from '@material-ui/core/styles';
 import { ThemeProvider } from '@material-ui/styles';
 import Suppliers from './suppliers';
 import Material from './material';
-import Reports from './reports';
+import Reports from './reportsmetabase';
+import Stock from './stock';
+import Blueprint from './blueprint';
+import Progress from './progress';
 import { useSelector, useDispatch } from "react-redux";
 import { set_log_out } from "../../redux/actions";
 import Button from '@material-ui/core/Button';
@@ -210,6 +213,10 @@ export default function Dashboard_empleado() {
               <Route path="/materiales" component={Material} />
               <Route path="/proveedores" component={Suppliers} />
               <Route path="/constructions" component={Constructions} />
+              <Route path="/stock" component={Stock} />
+              <Route path="/reportes" component={Reports} />
+              <Route path="/planos" component={Blueprint} />
+              <Route path="/progreso" component={Progress} />
               <Route path="/" component={DashboardUser} />
             </Switch>
           </Container>

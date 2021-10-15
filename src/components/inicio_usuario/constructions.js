@@ -85,7 +85,8 @@ export default function Banks() {
   const [optionsMat, setOptionsMat] = useState([]);
   const [openStock, setOpenStock] = useState(false);
   const loadingStock = openStock && optionsMat.length === 0;
-  const [idMat, setIdMat] = React.useState("");  
+  const [idMat, setIdMat] = React.useState("");
+  const [cons_name, setConsName] = React.useState("");  
   const { usuario, access} = useSelector(state => ({
     usuario: state.redux_reducer.usuario,
     access: state.redux_reducer.usuario.userInfo.access
@@ -126,6 +127,7 @@ export default function Banks() {
     temp_constructor.filter((x) => x.client_id === client_id).length === 0
       ? temp_constructor.push({
           client_id: client_id,
+          construction_name: cons_name,
           construction_init_date: selectedDateOne,
           construction_final_date: selectedDateTwo,
           construction_status_status: "ACTIVO"
@@ -226,6 +228,7 @@ export default function Banks() {
       },
       body: JSON.stringify({
         client_id: constructor_temp[0].client_id,
+        construction_name: constructor_temp[0].cons_name,
         construction_init_date: constructor_temp[0].construction_init_date,
         construction_final_date: constructor_temp[0].construction_final_date,
         construction_status_status: constructor_temp[0].construction_status_status
@@ -276,6 +279,7 @@ export default function Banks() {
         }else{
             set_success_message("Stock creado con éxito");
             set_success(true);
+            handleClickPlusClose();
         }  
       })
       .catch((err) => {
@@ -388,7 +392,22 @@ export default function Banks() {
                 )}
               />
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
+            <TextField
+                id="filled-full-width-consname"
+                label="Nombre de Obra"
+                style={{ margin: 8 }}
+                fullWidth
+                margin="normal"
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                variant="outlined"
+                value={cons_name}
+                onChange={(e) => setConsName(e.target.value)}
+            />
+            </Grid>
+            <Grid item xs={3}>
             <MuiPickersUtilsProvider utils={DateFnsUtils}>
               <KeyboardDatePicker
                 
@@ -398,7 +417,7 @@ export default function Banks() {
                 format="yyyy/MM/dd"
                 margin="normal"
                 id="date-picker-inline-const"
-                label="Seleccione la fecha de inicio"
+                label="Fecha de inicio"
                 value={selectedDateOne}
                 onChange={handleDateChangeOne}
                 KeyboardButtonProps={{
@@ -406,7 +425,7 @@ export default function Banks() {
                 }}
               /></MuiPickersUtilsProvider>
               </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
             <MuiPickersUtilsProvider utils={DateFnsUtils}>
               <KeyboardDatePicker
                 disablePast
@@ -415,7 +434,7 @@ export default function Banks() {
                 format="yyyy/MM/dd"
                 margin="normal"
                 id="date-picker-inline-consttwo"
-                label="Seleccione la fecha de finzalición"
+                label="Fecha de finzalición"
                 value={selectedDateTwo}
                 onChange={handleDateChangeTwo}
                 KeyboardButtonProps={{
@@ -445,6 +464,7 @@ export default function Banks() {
                 <TableHead>
                 <TableRow>
                     <TableCell>Cliente id</TableCell>
+                    <TableCell>Nombre</TableCell>
                     <TableCell>Fecha inicio</TableCell>
                     <TableCell>Fecha final</TableCell>
                     <TableCell>Estado</TableCell>
@@ -454,6 +474,7 @@ export default function Banks() {
                 {constructor_temp.map((element) => (
                     <TableRow key={element.client_id}>
                     <TableCell>{element.client_id}</TableCell>
+                    <TableCell>{element.construction_name}</TableCell>
                     <TableCell>
                         {new Date(element.construction_init_date).toLocaleDateString()}
                     </TableCell>
@@ -504,6 +525,7 @@ export default function Banks() {
                 <TableRow>
                     <TableCell>Const ID</TableCell>
                     <TableCell>Cliente ID</TableCell>
+                    <TableCell>Nombre</TableCell>
                     <TableCell>Fecha Inicio</TableCell>
                     <TableCell>Fecha Final</TableCell>
                     <TableCell>Estado</TableCell>
@@ -514,6 +536,7 @@ export default function Banks() {
                     <TableRow key={element.construction_id}>
                     <TableCell>{element.construction_id}</TableCell>
                     <TableCell>{element.client_id}</TableCell>
+                    <TableCell>{element.construction_name}</TableCell>
                     <TableCell>{new Date(element.construction_init_date).toLocaleDateString()}</TableCell>
                     <TableCell>{new Date(element.construction_final_date).toLocaleDateString()}</TableCell>
                     <TableCell>{element.construction_status_status}</TableCell>
