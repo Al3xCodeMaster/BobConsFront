@@ -75,7 +75,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Login_usuario = () => {
+const Login_usuario = (props) => {
   const { message, usuario } = useSelector(state => ({
     message: state.redux_reducer.message,
     usuario: state.redux_reducer.usuario,
@@ -167,6 +167,15 @@ const Login_usuario = () => {
             >
               Ingresar
                <Check style={{ fontSize: 35, marginLeft: '10px' }} />
+            </Button>
+            <Button
+              fullWidth
+              variant="contained"
+              onClick={() => {props.history.push(`/landingpagecliente`)}}
+              style={{ background: '#F8DB66', MozBorderRadius: 40, color: 'white', fontSize: 20, font: 'bold' }}
+              className={classes.submit}
+            >
+              Ir a pagina de consultas de obra publica
             </Button>
             <Snackbar open={pass_invalid} autoHideDuration={4000}
               anchorOrigin={{ vertical:'bottom', horizontal:'center' }}
