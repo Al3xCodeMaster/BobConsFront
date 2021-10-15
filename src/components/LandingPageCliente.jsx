@@ -21,7 +21,12 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
-
+import { useSelector, useDispatch} from "react-redux";
+import SearchLocation from "./mapas/search_location";
+import {Dialog, DialogTitle, DialogActions, DialogContent, FormControlLabel, Switch} from "@material-ui/core";
+import {
+  set_coordinates  
+} from '../redux/actions';
 
 const theme = createMuiTheme({
     palette: {
@@ -68,8 +73,14 @@ const LandingPageCliente = (props) => {
 
   const [infoObras, setInfoObras] = React.useState([]);
 
+  const [openDG, setOpenDG] = React.useState(false);
 
+  const dispatch = useDispatch();
 
+  const handleClickMap = (lat,ln) => {
+    dispatch(set_coordinates({ lat: lat, lng: ln}));
+    setOpenDG(true);
+  }
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -147,11 +158,30 @@ const LandingPageCliente = (props) => {
               <TableCell>{parseoFecha(row.fields.construction_final_date)}</TableCell>
               <TableCell>{row.fields.construction_status_status}</TableCell>
               <TableCell><Button variant="contained" color="secondary" onClick={() => {props.history.push(`/detailobra/${row.pk}`)}}> Ver Detalle </Button></TableCell>
-              <TableCell><Button variant="contained" color="secondary"> Ver Mapa </Button></TableCell>
+              <TableCell><Button variant="contained" color="secondary" onClick={() => handleClickMap(row.fields.construction_latitude,row.fields.construction_longitude)}> Ver Mapa </Button></TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
+      <Dialog
+          open={openDG}
+          onClose={() => setOpenDG(false)}
+          scroll='body'
+          aria-labelledby="scroll-dialog-title"
+          aria-describedby="scroll-dialog-description"
+        >
+        <DialogTitle id="scroll-dialog-title-location">Visualizador del Mapa</DialogTitle>
+        <DialogContent>
+        <div>
+          <SearchLocation/>
+        </div>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDG(false)} color="primary">
+          OK
+          </Button>
+        </DialogActions>
+      </Dialog>
     </ThemeProvider>
   );
 }

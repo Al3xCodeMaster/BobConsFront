@@ -78,7 +78,7 @@ export default function Search_location() {
                                     </CardContent>
                                 </Card>
                             </div>
-                            <input className={classes.input} {...getInputProps({ placeholder: "Escrie la dirección..." })} />
+                            <input className={classes.input} {...getInputProps({ placeholder: "Escribe la dirección..." })} />
 
                             <div>
                                 {loading ? <div>...loading</div> : null}
