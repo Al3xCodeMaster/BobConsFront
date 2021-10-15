@@ -5,7 +5,7 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
 import Link from '@material-ui/core/Link';
 import Grid from '@material-ui/core/Grid';
-import ApartmentIcon from '@material-ui/icons/Apartment';
+import BuildIcon from '@material-ui/icons/Build';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
@@ -57,24 +57,17 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const parseoFecha = (fecha) => {
-  return `${fecha.substring(8,10)}/${fecha.substring(5,7)}/${fecha.substring(0,4)} a las ${fecha.substring(11,19)}`
-}
+    return `${fecha.substring(8,10)}/${fecha.substring(5,7)}/${fecha.substring(0,4)} a las ${fecha.substring(11,19)}`
+  }
 
-const LandingPageCliente = (props) => {
+const DetailObra = (props) => {
   const classes = useStyles();
-  
+  const { match } = props;
+  const obraId = match.params.idObra;
+  const [infoProgresos, setInfoProgresos] = React.useState([]);
 
-  const [cedula, setCedula] = React.useState('');
-
-  const [infoObras, setInfoObras] = React.useState([]);
-
-
-
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    console.log("boton pulsado")
-    fetch(`https://bobcons.herokuapp.com/api/constructionProgressGet/${cedula}`, 
+  React.useEffect(() => {
+    fetch(`https://bobcons.herokuapp.com/api/progressConstructionIdGet/${obraId}`, 
     {
       method: 'GET',
       headers: { "Content-Type": "application/json"
@@ -82,9 +75,11 @@ const LandingPageCliente = (props) => {
     }).then(res => res.json())
       .then(data => {
         console.log(data)
-        setInfoObras(data)
+        setInfoProgresos(data)
       })
-  }
+  }, []);
+
+  
 
 
   return (
@@ -93,37 +88,11 @@ const LandingPageCliente = (props) => {
       <CssBaseline />
       <div className={classes.paper}>
         <Avatar className={classes.avatar}>
-          <ApartmentIcon color="secondary"/>
+          <BuildIcon color="secondary"/>
         </Avatar>
         <Typography component="h1" variant="h5">
-          Consulta de Obras
+          Obra #{obraId}
         </Typography>
-        <form className={classes.form} onSubmit={handleSubmit}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                autoComplete="cedula"
-                name="cedula"
-                variant="outlined"
-                required
-                fullWidth
-                id="cedula"
-                label="Cedula"
-                onChange={(event) => {setCedula(event.target.value)}}
-                autoFocus
-              />
-            </Grid>
-          </Grid>
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            color="secondary"
-            className={classes.submit}
-          >
-            Consultar
-          </Button>
-        </form>
       </div>
     </Container>
     <Table size="small">
@@ -131,23 +100,21 @@ const LandingPageCliente = (props) => {
           <TableRow>
             <TableCell>Nombre Construccion</TableCell>
             <TableCell>ID</TableCell>
-            <TableCell>Fecha de Inicio de Obra</TableCell>
-            <TableCell>Fecha de Final de Obra</TableCell>
-            <TableCell>Estado de Obra</TableCell>
-            <TableCell>Detalle de Obra</TableCell>
-            <TableCell>Geolocalización</TableCell>
+            <TableCell>Fecha en la que registró Progreso</TableCell>
+            <TableCell>Detalle de Progreso</TableCell>
+            <TableCell>Audio de Progreso</TableCell>
+            <TableCell>Foto de Progreso</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {infoObras.map((row) => (
+          {infoProgresos.map((row) => (
             <TableRow key={row.pk}>
               <TableCell>{row.fields.construction_name}</TableCell>
               <TableCell>{row.pk}</TableCell>
-              <TableCell>{parseoFecha(row.fields.construction_init_date)}</TableCell>
-              <TableCell>{parseoFecha(row.fields.construction_final_date)}</TableCell>
-              <TableCell>{row.fields.construction_status_status}</TableCell>
-              <TableCell><Button variant="contained" color="secondary" onClick={() => {props.history.push(`/detailobra/${row.pk}`)}}> Ver Detalle </Button></TableCell>
-              <TableCell><Button variant="contained" color="secondary"> Ver Mapa </Button></TableCell>
+              <TableCell>{parseoFecha(row.fields.progress_date)}</TableCell>
+              <TableCell>{row.fields.progress_detail}</TableCell>
+              <TableCell>{row.fields.progress_audio}</TableCell>
+              <TableCell>{row.fields.progress_photo}</TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -156,4 +123,4 @@ const LandingPageCliente = (props) => {
   );
 }
 
-export default LandingPageCliente;
+export default DetailObra;

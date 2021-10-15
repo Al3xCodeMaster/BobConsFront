@@ -6,6 +6,7 @@ import store from './redux/store';
 import Login_usuario from './components/login_usuario';
 import Dashboard_usuario from './components/inicio_usuario';
 import LandingPageCliente from './components/LandingPageCliente';
+import DetailObra from './components/DetailObra';
 import './index.css';
   
 const Root = () =>{
@@ -16,6 +17,7 @@ const Root = () =>{
 		<Route path="/login/usuario" component={Login_usuario}/>
         <Route path="/inicio/usuario" component={Dashboard_usuario}/>
         <Route path="/landingpagecliente" component={LandingPageCliente}/>
+        <Route path="/detailobra/:idObra" component={DetailObra}/>
         <Redirect from="/" to="/login/usuario"/>
     </Switch>
     </BrowserRouter>
