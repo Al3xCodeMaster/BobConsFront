@@ -189,8 +189,12 @@ export default function Perfiles() {
     var formData = new FormData();
     formData.append("construction_id", id_cons);
     formData.append("progress_detail", details);
-    formData.append("progress_photo", progresspic);
-    formData.append("progress_audio", progressaudio);
+    if(progresspic!=null){
+      formData.append("progress_photo", progresspic);
+    }
+    if(progressaudio!=null){
+      formData.append("progress_audio", progressaudio);
+    }
     fetch("https://bobcons.herokuapp.com/api/progress/", {
       method: "POST",
       headers: {

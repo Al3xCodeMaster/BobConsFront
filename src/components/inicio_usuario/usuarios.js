@@ -583,7 +583,7 @@ function TabPanel(props) {
                         }
                         onClick={(event) => handleClick(event, row)}
                         tabIndex={-1}
-                        key={labelId+row.RestaurantUserID}
+                        key={labelId}
                       >
                         <TableCell padding="checkbox">
                         <IconButton
