@@ -1,32 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, Fragment, useEffect } from "react";
 import { useSelector} from "react-redux";
 import { useTheme } from '@material-ui/core/styles';
 import { LineChart, Line, XAxis, YAxis, Label, ResponsiveContainer } from 'recharts';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import Container from '@material-ui/core/Container';
-import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
-import Title from './Title';
-import {
-  BarChart, Bar, CartesianGrid, Tooltip, Legend,
-} from 'recharts';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import CircularProgress from "@material-ui/core/CircularProgress";
-import TextField from '@material-ui/core/TextField';
-import Button from '@material-ui/core/Button';
-import DateFnsUtils from '@date-io/date-fns';
-import {
-  MuiPickersUtilsProvider,
-  KeyboardDatePicker,
-} from '@material-ui/pickers';
+import PropTypes from "prop-types";
+import AppBar from "@material-ui/core/AppBar";
+import Tabs from "@material-ui/core/Tabs";
+import Tab from "@material-ui/core/Tab";
+import Typography from "@material-ui/core/Typography";
+import Box from "@material-ui/core/Box";
+import SwipeableViews from "react-swipeable-views";
 
 const drawerWidth = 240;
 
@@ -110,10 +94,47 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+function TabPanel(props) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`full-width-tabpanel-${index}`}
+      aria-labelledby={`full-width-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box p={3}>
+          <Typography>{children}</Typography>
+        </Box>
+      )}
+    </div>
+  );
+}
+
+TabPanel.propTypes = {
+  children: PropTypes.node,
+  index: PropTypes.any.isRequired,
+  value: PropTypes.any.isRequired,
+};
+
+function a11yProps(index) {
+  return {
+    id: `full-width-tab-${index}`,
+    "aria-controls": `full-width-tabpanel-${index}`,
+  };
+}
+
+
 export default function Reports() {
-  const classes = useStyles();  
+  const classes = useStyles();
+  const [value, setValue] = React.useState(0);  
   const theme = useTheme();
-  const [url, setUrl] = React.useState("");
+  const [urlUser, setUrlUser] = React.useState("");
+  const [urlClient, setUrlClient] = React.useState("");
+  const [urlAvance, setUrlAvance] = React.useState("");
   const { usuario, access} = useSelector(state => ({
     usuario: state.redux_reducer.usuario,
     access: state.redux_reducer.usuario.userInfo.access
@@ -136,7 +157,55 @@ export default function Reports() {
         if (status != 200) {
           return
         }
-        setUrl(response.reportes);
+        setUrlUser(response.reportes);
+      })
+      .catch((error) => {
+        alert(error);
+      });
+  }, []);
+
+  React.useEffect(() => {
+    
+    let status;
+    fetch("https://bobcons.herokuapp.com/api/reporteCliente/", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + access,
+      }
+    })
+      .then((res) => {
+      status = res.status; 
+      return res.json();})
+      .then((response) => {
+        if (status != 200) {
+          return
+        }
+        setUrlClient(response.reportes);
+      })
+      .catch((error) => {
+        alert(error);
+      });
+  }, []);
+
+  React.useEffect(() => {
+    
+    let status;
+    fetch("https://bobcons.herokuapp.com/api/avanceReporte/", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + access,
+      }
+    })
+      .then((res) => {
+      status = res.status; 
+      return res.json();})
+      .then((response) => {
+        if (status != 200) {
+          return
+        }
+        setUrlAvance(response.reportes);
       })
       .catch((error) => {
         alert(error);
@@ -145,15 +214,60 @@ export default function Reports() {
 
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+  };
+
+  const handleChangeIndex = (index) => {
+    setValue(index);
+  };
+
   return (
-   
-        <iframe
-            src={url}
+    <Fragment className={classes.root}>
+    <AppBar position="static">
+        <Tabs
+          value={value}
+          onChange={handleChange}
+          indicatorColor="primary"
+          textColor="primary"
+          variant="fullWidth"
+          aria-label="full width tabs example"
+          className={classes.indicator}
+        >
+          <Tab label="Usuarios" {...a11yProps(0)} />
+          <Tab label="Clientes" {...a11yProps(1)} />
+          <Tab label="Avances" {...a11yProps(2)} />
+        </Tabs>
+      </AppBar>
+      <TabPanel value={value} index={0} dir={theme.direction}>
+      <iframe
+            src={urlUser}
             frameborder="0"
             width="100%"
             height="800px"
             allowtransparency
         />
+      </TabPanel>
+      <TabPanel value={value} index={1} dir={theme.direction}>
+      <iframe
+            src={urlClient}
+            frameborder="0"
+            width="100%"
+            height="800px"
+            allowtransparency
+        />
+      </TabPanel>
+      <TabPanel value={value} index={2} dir={theme.direction}>
+      <iframe
+            src={urlAvance}
+            frameborder="0"
+            width="100%"
+            height="800px"
+            allowtransparency
+        />
+      </TabPanel>
+  </Fragment>
+        
 
   );
 }

@@ -10,6 +10,7 @@ import Snackbar from "@material-ui/core/Snackbar";
 import Alert from "@material-ui/lab/Alert";
 import { CheckCircleOutline, DeleteOutline } from "@material-ui/icons";
 import Table from "@material-ui/core/Table";
+import MapSharp from "@material-ui/icons/MapSharp";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
 import TableContainer from "@material-ui/core/TableContainer";
@@ -28,6 +29,10 @@ import {
   KeyboardDatePicker,
 } from '@material-ui/pickers';
 import {Dialog, DialogTitle, DialogActions, DialogContent, FormControlLabel, Switch} from "@material-ui/core";
+import SearchLocation from "../mapas/search_location";
+import {
+  set_coordinates  
+} from '../../redux/actions';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -74,6 +79,7 @@ export default function Banks() {
   const [options, setOptions] = useState([]);
 	const [open, setOpen] = useState(false);
   const [openD, setOpenD] = React.useState(false);
+  const [openDG, setOpenDG] = React.useState(false);
   const [openDStock, setOpenDStock] = React.useState(false);
 	const loading = open && options.length === 0;
   const [selectedDateOne, setSelectedDateOne] = React.useState(new Date(Date.now()));
@@ -87,10 +93,16 @@ export default function Banks() {
   const loadingStock = openStock && optionsMat.length === 0;
   const [idMat, setIdMat] = React.useState("");
   const [cons_name, setConsName] = React.useState("");  
-  const { usuario, access} = useSelector(state => ({
+  const { usuario, access, coordenadas} = useSelector(state => ({
     usuario: state.redux_reducer.usuario,
-    access: state.redux_reducer.usuario.userInfo.access
+    access: state.redux_reducer.usuario.userInfo.access,
+    coordenadas: state.redux_reducer.coordenadas
   }));
+  const dispatch = useDispatch();
+
+  const handleClickMap = (lat,ln) => {
+    dispatch(set_coordinates({ lat: lat, lng: ln}));
+  }
 
   const handleClickPlus = (item) => {
     setConstID(item.construction_id);
@@ -104,6 +116,7 @@ export default function Banks() {
   const handleClick = (item) => {
     setSelectedDateThree(new Date(item.construction_final_date));
     setConstID(item.construction_id);
+    handleClickMap(item.construction_latitude,item.construction_longitude);
     setOpenD(true);
   }
 
@@ -228,10 +241,12 @@ export default function Banks() {
       },
       body: JSON.stringify({
         client_id: constructor_temp[0].client_id,
-        construction_name: constructor_temp[0].cons_name,
+        construction_name: constructor_temp[0].construction_name,
         construction_init_date: constructor_temp[0].construction_init_date,
         construction_final_date: constructor_temp[0].construction_final_date,
-        construction_status_status: constructor_temp[0].construction_status_status
+        construction_status_status: constructor_temp[0].construction_status_status,
+        construction_latitude: parseFloat(coordenadas.lat),
+        construction_longitude: parseFloat(coordenadas.lng)
       }),
     })
       .then((res) => {
@@ -245,6 +260,8 @@ export default function Banks() {
         }else{
             set_success_message("Obra creada con éxito");
             set_success(true);
+            setOpenDG(false);
+            set_cargando(false);
             set_constructor_temp([]);
             refresh();
         }  
@@ -298,7 +315,9 @@ export default function Banks() {
       body: JSON.stringify({
         construction_id: constID,
         construction_final_date: selectedDateThree,
-        construction_status_status: valueState
+        construction_status_status: valueState,
+        construction_latitude: coordenadas.lat,
+        construction_longitude: coordenadas.lng
       }), // data can be `string` or {object}!
     })
       .then((res) => {
@@ -441,6 +460,18 @@ export default function Banks() {
                   'aria-label': 'change date',
                 }}
               /></MuiPickersUtilsProvider>
+            </Grid>
+            <Grid item xs={4}>
+                <Button
+                disabled={cargando}
+                style={{ color: "green", marginLeft: "1%" }}
+                onClick={(e) => setOpenDG(true)}
+                >
+                Geolocalizar
+                <MapSharp
+                    style={{ fontSize: 30, marginLeft: "10px", color: "green" }}
+                />
+                </Button>
             </Grid>
             <Grid item xs={4}>
                 <Button
@@ -600,6 +631,12 @@ export default function Banks() {
               /></MuiPickersUtilsProvider>
         </div>
         </DialogContent>
+        <IconButton
+                            onClick={ () => setOpenDG(true)}
+                            children={
+                              <MapSharp/>
+                            }
+        />
         <DialogActions>
           <Button onClick={handleClose} color="primary">
             Cancel
@@ -609,8 +646,25 @@ export default function Banks() {
           </Button>
         </DialogActions>
       </Dialog>
-
-
+      <Dialog
+          open={openDG}
+          onClose={() => setOpenDG(false)}
+          scroll='body'
+          aria-labelledby="scroll-dialog-title"
+          aria-describedby="scroll-dialog-description"
+        >
+        <DialogTitle id="scroll-dialog-title-location">Añadir geolocalización</DialogTitle>
+        <DialogContent>
+        <div>
+          <SearchLocation/>
+        </div>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDG(false)} color="primary">
+          OK
+          </Button>
+        </DialogActions>
+      </Dialog>
       <Dialog
           open={openDStock}
           onClose={handleClose}

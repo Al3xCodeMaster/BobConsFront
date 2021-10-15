@@ -35,7 +35,7 @@ export default function Search_location() {
     const classes = useStyles();
     const { coordenadas, direccion } = useSelector(state => ({
         coordenadas: state.redux_reducer.coordenadas,
-        direccion: state.redux_reducer.direccion,
+        direccion: state.redux_reducer.address,
     }));
     const dispatch = useDispatch()
     const [coordinates, setCoordinates] = React.useState({
@@ -55,7 +55,7 @@ export default function Search_location() {
 
     return (
 
-        <Grid container spacing={5}>
+        <Grid container spacing={2}>
             <Grid item xs={5}>
                 <PlacesAutocomplete
                     value={address}
@@ -78,7 +78,7 @@ export default function Search_location() {
                                     </CardContent>
                                 </Card>
                             </div>
-                            <input className={classes.input} {...getInputProps({ placeholder: "Escripe la dirección..." })} />
+                            <input className={classes.input} {...getInputProps({ placeholder: "Escrie la dirección..." })} />
 
                             <div>
                                 {loading ? <div>...loading</div> : null}

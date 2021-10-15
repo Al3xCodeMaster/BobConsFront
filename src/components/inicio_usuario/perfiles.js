@@ -264,6 +264,7 @@ export default function Perfiles() {
         }
         set_success(true);
         set_success_message("Perfil agregado con éxito");
+        set_cargando(false);
         refresh();
       })
       .catch((err) => {

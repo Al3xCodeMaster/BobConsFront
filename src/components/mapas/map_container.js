@@ -4,7 +4,7 @@ import Geocode from "react-geocode";
 import { connect } from 'react-redux';
 import { set_coordinates, set_Address} from '../../redux/actions';
 import { withRouter, Redirect } from 'react-router-dom';
-Geocode.setApiKey("AIzaSyDcpnTaFMV5WjJULkv5HTKX5kHw7FeL8A4");
+Geocode.setApiKey("AIzaSyDujuj4Ia2VIkcFVPFAajuUPLOmeVm4zUg");
 // set response language. Defaults to english.
 Geocode.setLanguage("en");
  
@@ -12,8 +12,6 @@ Geocode.setLanguage("en");
 // A Geocoding request with region=es (Spain) will return the Spanish city.
 Geocode.setRegion("es");
  
-// Enable or disable logs. Its optional.
-Geocode.enableDebug();
 
 class Mapa extends Component {
   constructor(props) {
@@ -23,7 +21,8 @@ class Mapa extends Component {
       {
         title: "The marker`s title will appear as a tooltip.",
         name: "SOMA",
-        position: { lat: 37.778519, lng: -122.40564 }
+        position: { lat: 3.4516467,
+          lng: -76.5319854 }
       },
       direccion:'',
       showingInfoWindow: false,
@@ -42,7 +41,6 @@ class Mapa extends Component {
     Geocode.fromLatLng(lat, lng).then(
       response => {
         const address = response.results[0].formatted_address;
-        alert(address);
         this.props.set_Address(address);
       },
       error => {
@@ -77,6 +75,7 @@ class Mapa extends Component {
           className={"map"}
           zoom={16}
           center={coordenadas}
+          initialCenter={coordenadas}
         >
           <Marker onClick={this.onMarkerClick}
             position={coordenadas}
@@ -99,13 +98,13 @@ class Mapa extends Component {
 }
 
 const MapContainer = GoogleApiWrapper({
-  apiKey: ("AIzaSyDcpnTaFMV5WjJULkv5HTKX5kHw7FeL8A4")
+  apiKey: ("AIzaSyDujuj4Ia2VIkcFVPFAajuUPLOmeVm4zUg")
 })(Mapa);
 
 const mapStateToProps = (state) => {
   return {
     coordenadas: state.redux_reducer.coordenadas,
-    direccion: state.redux_reducer.direccion,
+    direccion: state.redux_reducer.address,
   };
 }
 const mapDispatchToProps = {

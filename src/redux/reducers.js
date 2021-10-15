@@ -29,7 +29,7 @@ const initialState = {
     client: {},
     message: 'Hola redux',
     cargando: false,
-    coordenadas: { lat: 3.382225, lng: -76.531584 },
+    coordenadas: { lat: 3.4516467, lng: -76.5319854 },
     address: '',
     datePick: new Date(Date.now()),
     subio_fot: null,
