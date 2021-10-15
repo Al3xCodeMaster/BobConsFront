@@ -106,6 +106,7 @@ const DetailObra = (props) => {
         <Typography component="h1" variant="h5">
           Obra #{obraId}
         </Typography>
+        <Button variant="contained" color="secondary" onClick={() => {props.history.push(`/landingpagecliente`)}}> Regresar Atrás </Button>
       </div>
     </Container>
     <Table size="small">
