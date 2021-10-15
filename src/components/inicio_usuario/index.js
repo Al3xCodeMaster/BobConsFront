@@ -37,11 +37,11 @@ const theme = createMuiTheme({
     palette: {
       primary: {
         // Purple and green play nicely together.
-        main: '#FF0000',
+        main: '#2b8b4b',
       },
       secondary: {
         // This is green.A700 as hex.
-        main: '#000000',
+        main: '#F8DB66',
       },
     },
   });
@@ -77,7 +77,7 @@ const useStyles = makeStyles((theme) => ({
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
-    background: '#E73E20',
+    background: '#2b8b4b',
     transition: theme.transitions.create(['width', 'margin'], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,

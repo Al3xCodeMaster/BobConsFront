@@ -21,6 +21,8 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
+import Modal from '@material-ui/core/Modal';
+import Paper from '@material-ui/core/Paper';
 
 
 const theme = createMuiTheme({
@@ -64,7 +66,16 @@ const DetailObra = (props) => {
   const classes = useStyles();
   const { match } = props;
   const obraId = match.params.idObra;
+  const [infoConstruccion, setInfoConstruccion] = React.useState([]);
   const [infoProgresos, setInfoProgresos] = React.useState([]);
+
+  const [open, setOpen] = React.useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  const [open2, setOpen2] = React.useState(false);
+  const handleOpen2 = () => setOpen2(true);
+  const handleClose2 = () => setOpen2(false);
 
   React.useEffect(() => {
     fetch(`https://bobcons.herokuapp.com/api/progressConstructionIdGet/${obraId}`, 
@@ -74,8 +85,10 @@ const DetailObra = (props) => {
                },
     }).then(res => res.json())
       .then(data => {
-        console.log(data)
-        setInfoProgresos(data)
+        console.log(data.progress)
+        setInfoProgresos(data.progress)
+        console.log(data.construction)
+        setInfoConstruccion(data.construction)
       })
   }, []);
 
@@ -109,12 +122,32 @@ const DetailObra = (props) => {
         <TableBody>
           {infoProgresos.map((row) => (
             <TableRow key={row.pk}>
-              <TableCell>{row.fields.construction_name}</TableCell>
+              <TableCell>{infoConstruccion.construction_name}</TableCell>
               <TableCell>{row.pk}</TableCell>
-              <TableCell>{parseoFecha(row.fields.progress_date)}</TableCell>
-              <TableCell>{row.fields.progress_detail}</TableCell>
-              <TableCell>{row.fields.progress_audio}</TableCell>
-              <TableCell>{row.fields.progress_photo}</TableCell>
+              <TableCell>{parseoFecha(row.progress_date)}</TableCell>
+              <TableCell>{row.progress_detail}</TableCell>
+              <TableCell><Button variant="contained" color="secondary" onClick={handleOpen}> Reproducir Audio </Button>
+              <Modal
+            open={open}
+            onClose={handleClose}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+          >
+            {<Paper variant="outlined" style={{textAlign: 'center'}}>
+            <audio controls src={"https://bob-cons-media.s3.amazonaws.com/"+  `${row.progress_audio}`} type="audio/mpeg"/>
+            </Paper>}
+          </Modal></TableCell>
+              <TableCell><Button variant="contained" color="secondary" onClick={handleOpen2}> Ver Imagen </Button>
+              <Modal
+            open={open2}
+            onClose={handleClose2}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+          >
+            {<Paper variant="outlined" style={{textAlign: 'center'}}>
+              <img style={{width: '400px', height:'400px', marginTop:'5%'}} src={"https://bob-cons-media.s3.amazonaws.com/"+  `${row.progress_photo}`} />
+            </Paper>}
+          </Modal></TableCell>
             </TableRow>
           ))}
         </TableBody>
