@@ -675,8 +675,8 @@ export default function Perfiles() {
         <Grid container className={classes.root} spacing={5}>
           <Grid item xs={6}>
             <TextField
-              id="standard-txt"
-              label="Nombre del perfil"
+              id="standard-txt-usuario-asign"
+              label="ID usuario"
               fullWidth
               type="number"
               value={id_doc}
@@ -689,42 +689,6 @@ export default function Perfiles() {
                 ),
               }}
             />
-          </Grid>
-          <Grid item xs={3}>
-          <Autocomplete
-						id="async-autocompl"
-						open={open}
-						onOpen={() => {
-							setOpen(true);
-						}}
-						onClose={() => {
-							setOpen(false);
-						}}
-						getOptionSelected={(option, value) => option === value}
-						onChange={(event, newValue) => {
-							set_state_type_id(newValue);
-						}}
-						getOptionLabel={(option) => option}
-						options={options}
-						loading={loading}
-						renderInput={(params) => (
-							<TextField 
-								{...params}
-								className={classes.input}
-								label="Seleccione el documento"
-								variant="outlined"
-								InputProps={{
-									...params.InputProps,
-									endAdornment: (
-										<React.Fragment>
-											{loading ? <CircularProgress color="inherit" size={20} /> : null}
-											{params.InputProps.endAdornment}
-										</React.Fragment>
-									),
-								}}
-							/>
-						)}
-			    />
           </Grid>
           <Grid item xs={2}>
             <Button style={{ marginLeft: "1%" }} onClick={buscar_id}>
