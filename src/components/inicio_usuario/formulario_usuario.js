@@ -357,7 +357,7 @@ export default function Formulario_empleado() {
 					  })
 				}).then(res => res.json())
 					.then(response => {
-						if (response.status !=200) {
+						if (response.status !=201) {
 							set_message(response.details);
 							setOpen(true);
 						}

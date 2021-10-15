@@ -161,6 +161,7 @@ export default function Banks() {
         }else{
             set_success_message("Supplier agregado con éxito");
             set_success(true);
+            set_cargando(false);
             set_sup_temp([]);
             set_nit("");
             set_mail("");

@@ -167,6 +167,7 @@ export default function Banks() {
         }else{
             set_success_message("Material agregado con éxito");
             set_success(true);
+            set_cargando(false);
             set_mat_temp([]);
             set_nit("");
             set_name("");
