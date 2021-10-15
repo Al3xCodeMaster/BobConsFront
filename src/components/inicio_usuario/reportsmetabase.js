@@ -95,6 +95,7 @@ const useStyles = makeStyles((theme) => ({
     overflow: 'auto',
   },
   container: {
+    height:'100%',
     paddingTop: theme.spacing(4),
     paddingBottom: theme.spacing(4),
   },
@@ -145,18 +146,15 @@ export default function Reports() {
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
 
   return (
-    <div className={classes.root}>
-      <CssBaseline />
-        <Container maxWidth="lg" className={classes.container}>
+   
         <iframe
             src={url}
             frameborder="0"
             width="100%"
-            height="600"
+            height="800px"
             allowtransparency
         />
-        </Container>
-    </div>
+
   );
 }
 
