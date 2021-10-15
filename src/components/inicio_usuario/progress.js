@@ -101,7 +101,7 @@ export default function Perfiles() {
   const [options, setOptions] = useState([]);
   const loading = open && options.length === 0;
   const [openDB, set_openDB] = useState(false);
-  const [obra_cargado, set_obra_cargado] = useState([]);
+  const [obra_cargado, set_obra_cargado] = useState(undefined);
   const [openM, setOpenM] = React.useState(false);
   const [url, set_url] = React.useState("");
   const [is_photo, set_is_photo] = React.useState(false);

@@ -158,7 +158,7 @@ export default function Dashboard_empleado() {
   };
 
   const logout = () => {
-    dispatch(set_log_out({}));
+    dispatch(set_log_out(usuario));
   }
 
   const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
@@ -166,7 +166,7 @@ export default function Dashboard_empleado() {
   return (
     <ThemeProvider theme={theme}>
     <BrowserRouter>
-    
+      {usuario.status===200 ? null: history.push("/login/usuario") }
       <div className={classes.root}>
         <CssBaseline />
         <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>

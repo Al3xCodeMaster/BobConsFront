@@ -81,7 +81,7 @@ function redux_reducer(state = initialState, action) {
         case SET_NAVBAR:
             return { ...state, nav_bar: action.payload}
         case SET_LOG_OUT:
-            return initialState    
+            return {...state, usuario: {...action.payload, status: 401}}    
         default:
             return state;
     }
